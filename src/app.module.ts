@@ -5,12 +5,16 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
-    MongooseModule.forRoot(process.env.DATABASE_URL||'mongodb://localhost:27017/nest-base'),
-    DatabaseModule
+    MongooseModule.forRoot(process.env.DATABASE_URL || 'mongodb://localhost:27017/nest-base'),
+    DatabaseModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
