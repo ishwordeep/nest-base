@@ -1,5 +1,10 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { MongoError } from 'mongodb';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -9,32 +14,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message: any = 'Internal server error';
+    let errors: Record<string, string[]> = { server: ['Internal server error'] };
 
-    // Handle NestJS HttpException
+    // 1️⃣ NestJS HttpException
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res = exception.getResponse();
-      message = typeof res === 'string' ? res : (res as any).message || res;
-    }
 
-    // Handle Mongoose validation errors
-    else if ((exception as any).name === 'ValidationError') {
-      status = HttpStatus.BAD_REQUEST;
-      const errors = Object.values((exception as any).errors).map((e: any) => e.message);
-      message = { validationErrors: errors };
+      if (typeof res === 'object' && (res as any).errors) {
+        errors = (res as any).errors; // Already in object format
+      } else {
+        errors = { error: [typeof res === 'string' ? res : (res as any).message] };
+      }
     }
-
-    // Handle Mongo duplicate key error
-    else if (exception instanceof MongoError && (exception as any).code === 11000) {
-      status = HttpStatus.CONFLICT; // 409 instead of 400
-      message = `Duplicate value error: ${JSON.stringify((exception as any).keyValue)}`;
-    }
-
-    // Handle Mongo network error
-    else if ((exception as any).name === 'MongoNetworkError') {
-      status = HttpStatus.SERVICE_UNAVAILABLE;
-      message = 'Database connection error';
+    // 2️⃣ MongoDB duplicate key error
+    else if ((exception as any).code === 11000) {
+      status = HttpStatus.CONFLICT;
+      errors = {
+        duplicate: [`Duplicate value: ${JSON.stringify((exception as any).keyValue)}`],
+      };
     }
 
     response.status(status).json({
@@ -42,7 +40,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message,
+      errors, // ✅ Now it's a single object
     });
   }
 }

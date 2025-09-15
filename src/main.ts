@@ -1,30 +1,48 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BadRequestException, HttpStatus, ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/exceptions/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true,
+  //     transform: true,
+  //     exceptionFactory: (errors) => {
+  //       const formattedErrors = errors.map(err => {
+  //         return {
+  //           [err.property]: Object.values(err.constraints ?? {}),
+  //         };
+  //       });
+
+  //       return new BadRequestException({
+  //        formattedErrors,
+  //       });
+  //     },
+  //   }),
+  // );
+   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       exceptionFactory: (errors) => {
-        const formattedErrors = errors.map(err => {
-          return {
-            [err.property]: Object.values(err.constraints ?? {}),
-          };
-        });
+        // Convert array of ValidationErrors into a single object
+        const formattedErrors = errors.reduce((acc, err) => {
+          acc[err.property] = Object.values(err.constraints ?? {});
+          return acc;
+        }, {} as Record<string, string[]>);
 
         return new BadRequestException({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
-          errors: formattedErrors,
+          errors: formattedErrors, // ✅ Object instead of array
         });
       },
     }),
   );
   app.setGlobalPrefix('api');
+   app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
