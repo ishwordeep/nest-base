@@ -1,33 +1,76 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
-    async create(createUserDto: CreateUserDto): Promise<any> {
-        const { password, ...data } = createUserDto;
-        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = this.userModel.create({
-            ...data,
-            password: hashedPassword,
-        });
-        return user;
+    async create(createUserDto: CreateUserDto): Promise<User> {
+        try {
+            const existingUser = await this.userModel.findOne({ email: createUserDto.email });
+            if (existingUser) throw new ConflictException('Email already exists');
+
+            const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+            return this.userModel.create({ ...createUserDto, password: hashedPassword });
+        } catch (error) {
+            // Custom handling
+            throw new InternalServerErrorException('Failed to create user');
+        }
     }
 
+
     async findAll(): Promise<User[]> {
-        return this.userModel.find().exec();
+        try {
+            return this.userModel.find().exec();
+        } catch (error) {
+            console.error('Find All Users Error:', error);
+            throw new InternalServerErrorException('Failed to fetch users');
+        }
     }
 
     async findOne(id: string): Promise<User> {
-        const user = await this.userModel.findById(id).exec();
-        if (!user) throw new NotFoundException(`User #${id} not found`);
-        return user;
+        try {
+            const user = await this.userModel.findById(id).exec();
+            if (!user) throw new NotFoundException(`User #${id} not found`);
+            return user;
+        } catch (error) {
+            console.error(`Find User #${id} Error:`, error);
+            throw new InternalServerErrorException('Failed to fetch user');
+        }
+    }
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+        try {
+            if (updateUserDto.password) {
+                updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+            }
+
+            const updatedUser = await this.userModel
+                .findByIdAndUpdate(id, updateUserDto, { new: true })
+                .exec();
+
+            if (!updatedUser) throw new NotFoundException(`User #${id} not found`);
+            return updatedUser;
+        } catch (error) {
+            console.error(`Update User #${id} Error:`, error);
+            throw new InternalServerErrorException('Failed to update user');
+        }
     }
 
+    async remove(id: string): Promise<User> {
+        try {
+            const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
+            if (!deletedUser) throw new NotFoundException(`User #${id} not found`);
+            return deletedUser;
+        } catch (error) {
+            console.error(`Delete User #${id} Error:`, error);
+            throw new InternalServerErrorException('Failed to delete user');
+        }
+    }
 }

@@ -11,23 +11,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: any = 'Internal server error';
 
-    // HTTP Exception
+    // Handle NestJS HttpException
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      message = exception.getResponse();
+      const res = exception.getResponse();
+      message = typeof res === 'string' ? res : (res as any).message || res;
     }
-    // Mongoose Validation Error
+
+    // Handle Mongoose validation errors
     else if ((exception as any).name === 'ValidationError') {
       status = HttpStatus.BAD_REQUEST;
-      const errors = Object.values((exception as any).errors).map(e => e.message);
+      const errors = Object.values((exception as any).errors).map((e: any) => e.message);
       message = { validationErrors: errors };
     }
-    // Mongo Duplicate Key Error
-    else if ((exception as any).code === 11000) {
-      status = HttpStatus.BAD_REQUEST;
+
+    // Handle Mongo duplicate key error
+    else if (exception instanceof MongoError && (exception as any).code === 11000) {
+      status = HttpStatus.CONFLICT; // 409 instead of 400
       message = `Duplicate value error: ${JSON.stringify((exception as any).keyValue)}`;
     }
-    // Mongo Connection Error
+
+    // Handle Mongo network error
     else if ((exception as any).name === 'MongoNetworkError') {
       status = HttpStatus.SERVICE_UNAVAILABLE;
       message = 'Database connection error';
@@ -35,6 +39,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     response.status(status).json({
       success: false,
+      statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       message,
