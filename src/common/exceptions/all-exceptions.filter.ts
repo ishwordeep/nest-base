@@ -23,6 +23,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       if (typeof res === 'object' && (res as any).errors) {
         errors = (res as any).errors; // Already in object format
+      } else if (status === HttpStatus.UNAUTHORIZED) {
+        // For unauthorized errors, return a simple string message
+        return response.status(status).json({
+          // success: false,
+          message: "Invalid credentials",
+          // message: "You are not authorized to perform this action"
+        });
+      } else if (status === HttpStatus.FORBIDDEN) {
+        // For forbidden errors, return the error message directly as the value of errors
+        return response.status(status).json({
+          success: false,
+          errors: typeof res === 'string' ? res : (res as any).message
+        });
       } else {
         errors = { error: [typeof res === 'string' ? res : (res as any).message] };
       }

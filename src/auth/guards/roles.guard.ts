@@ -1,4 +1,4 @@
- 
+
 
 import {
   CanActivate,
@@ -38,8 +38,13 @@ export class RolesGuard implements CanActivate {
 
     if (!user.role) {
       throw new ForbiddenException(
-        'Access denied: User role is missing. Please contact support.',
+        'Access denied: You are not authorized to perform this action.',
       );
+    }
+
+    // Always allow ADMIN role to access any resource
+    if (user.role === UserRole.ADMIN) {
+      return true;
     }
 
     if (!requiredRoles.includes(user.role)) {

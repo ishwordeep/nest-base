@@ -27,7 +27,8 @@ export class AuthService {
 
             const payload = {
                 sub: user._id,
-                email: user.email
+                email: user.email,
+                role:user.role
             };
 
             // ✅ No need to manually set secret here if JwtModule was configured correctly
