@@ -10,7 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
+    async createUser(createUserDto: CreateUserDto): Promise<User> {
         // 1️⃣ Check if email exists
         const existingUser = await this.userModel.findOne({ email: createUserDto.email });
         if (existingUser) {
