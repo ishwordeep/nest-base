@@ -11,17 +11,56 @@ export class UserService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
 
+    // async create(createUserDto: CreateUserDto): Promise<User> {
+    //     try {
+    //         const existingUser = await this.userModel.findOne({ email: createUserDto.email });
+    //         if (existingUser) {
+    //             throw new ConflictException({
+    //                 errors: { email: ['Email already exists'] },
+    //             });
+    //         }
+
+    //         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    //         return this.userModel.create({ ...createUserDto, password: hashedPassword });
+    //     } catch (error) {
+    //         // Custom handling
+    //         if (error.code === 11000) {
+    //             throw new ConflictException({
+    //                 errors: { email: ['Email already exists'] },
+    //             });
+    //         }
+    //         throw new InternalServerErrorException('Failed to create user');
+    //     }
+    // }
+
     async create(createUserDto: CreateUserDto): Promise<User> {
+        // 1️⃣ Check if email exists
+        const existingUser = await this.userModel.findOne({ email: createUserDto.email });
+        if (existingUser) {
+            throw new ConflictException({
+                errors: { email: ['Email already exists'] },
+            });
+        }
+
+        // 2️⃣ Hash password
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+        // 3️⃣ Create user
         try {
-            const existingUser = await this.userModel.findOne({ email: createUserDto.email });
-            if (existingUser) throw new ConflictException('Email already exists');
+            return await this.userModel.create({ ...createUserDto, password: hashedPassword });
+        } catch (error: any) {
+            // Handle MongoDB duplicate key (race condition)
+            if (error.code === 11000) {
+                throw new ConflictException({
+                    errors: { email: ['Email already exists'] },
+                });
+            }
 
-            const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-            return this.userModel.create({ ...createUserDto, password: hashedPassword });
-        } catch (error) {
-            // Custom handling
-            throw new InternalServerErrorException('Failed to create user');
+            console.error('Create User Error:', error);
+            throw new InternalServerErrorException({
+                errors: { server: ['Failed to create user'] },
+            });
         }
     }
 

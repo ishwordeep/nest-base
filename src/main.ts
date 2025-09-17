@@ -5,25 +5,8 @@ import { AllExceptionsFilter } from './common/exceptions/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true,
-  //     forbidNonWhitelisted: true,
-  //     transform: true,
-  //     exceptionFactory: (errors) => {
-  //       const formattedErrors = errors.map(err => {
-  //         return {
-  //           [err.property]: Object.values(err.constraints ?? {}),
-  //         };
-  //       });
 
-  //       return new BadRequestException({
-  //        formattedErrors,
-  //       });
-  //     },
-  //   }),
-  // );
-   app.useGlobalPipes(
+  app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -42,7 +25,7 @@ async function bootstrap() {
     }),
   );
   app.setGlobalPrefix('api');
-   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
