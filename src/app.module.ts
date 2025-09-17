@@ -7,6 +7,7 @@ import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from './user/user.module';
     MongooseModule.forRoot(process.env.DATABASE_URL || 'mongodb://localhost:27017/nest-base'),
     DatabaseModule,
     AuthModule,
+    JwtModule,
     UserModule,
   ],
   controllers: [AppController],

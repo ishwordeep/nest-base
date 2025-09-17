@@ -10,30 +10,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
-
-    // async create(createUserDto: CreateUserDto): Promise<User> {
-    //     try {
-    //         const existingUser = await this.userModel.findOne({ email: createUserDto.email });
-    //         if (existingUser) {
-    //             throw new ConflictException({
-    //                 errors: { email: ['Email already exists'] },
-    //             });
-    //         }
-
-    //         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    //         return this.userModel.create({ ...createUserDto, password: hashedPassword });
-    //     } catch (error) {
-    //         // Custom handling
-    //         if (error.code === 11000) {
-    //             throw new ConflictException({
-    //                 errors: { email: ['Email already exists'] },
-    //             });
-    //         }
-    //         throw new InternalServerErrorException('Failed to create user');
-    //     }
-    // }
-
     async create(createUserDto: CreateUserDto): Promise<User> {
         // 1️⃣ Check if email exists
         const existingUser = await this.userModel.findOne({ email: createUserDto.email });
@@ -111,5 +87,10 @@ export class UserService {
             console.error(`Delete User #${id} Error:`, error);
             throw new InternalServerErrorException('Failed to delete user');
         }
+    }
+    async findByEmail(email: string): Promise<User> {
+        const user = await this.userModel.findOne({ email }).exec();
+        if (!user) throw new NotFoundException('User not found');
+        return user;
     }
 }
