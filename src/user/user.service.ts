@@ -15,7 +15,8 @@ export class UserService {
         const existingUser = await this.userModel.findOne({ email: createUserDto.email });
         if (existingUser) {
             throw new ConflictException({
-                errors: { email: ['Email already exists'] },
+                message: "Email already exists. Please use a different email address.",
+                errors: { email: ["Email already exists"] },
             });
         }
 
@@ -29,13 +30,15 @@ export class UserService {
             // Handle MongoDB duplicate key (race condition)
             if (error.code === 11000) {
                 throw new ConflictException({
-                    errors: { email: ['Email already exists'] },
+                    message: "Email already exists. Please use a different email address.",
+                    errors: { email: ["Email already exists"] },
                 });
             }
 
             console.error('Create User Error:', error);
             throw new InternalServerErrorException({
-                errors: { server: ['Failed to create user'] },
+                message: "Failed to create user",
+                errors: { server: ["Failed to create user"] },
             });
         }
     }
@@ -46,18 +49,30 @@ export class UserService {
             return this.userModel.find().exec();
         } catch (error) {
             console.error('Find All Users Error:', error);
-            throw new InternalServerErrorException('Failed to fetch users');
+            throw new InternalServerErrorException({
+                message: "Failed to fetch users",
+                errors: { server: ["Failed to fetch users"] }
+            });
         }
     }
 
     async findOne(id: string): Promise<User> {
         try {
             const user = await this.userModel.findById(id).exec();
-            if (!user) throw new NotFoundException(`User #${id} not found`);
+            if (!user) {
+                const message = `User #${id} not found`;
+                throw new NotFoundException({
+                    message,
+                    errors: { user: [message] }
+                });
+            }
             return user;
         } catch (error) {
             console.error(`Find User #${id} Error:`, error);
-            throw new InternalServerErrorException('Failed to fetch user');
+            throw new InternalServerErrorException({
+                message: "Failed to fetch user",
+                errors: { server: ["Failed to fetch user"] }
+            });
         }
     }
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -70,27 +85,50 @@ export class UserService {
                 .findByIdAndUpdate(id, updateUserDto, { new: true })
                 .exec();
 
-            if (!updatedUser) throw new NotFoundException(`User #${id} not found`);
+            if (!updatedUser) {
+                const message = `User #${id} not found`;
+                throw new NotFoundException({
+                    message,
+                    errors: { user: [message] }
+                });
+            }
             return updatedUser;
         } catch (error) {
             console.error(`Update User #${id} Error:`, error);
-            throw new InternalServerErrorException('Failed to update user');
+            throw new InternalServerErrorException({
+                message: "Failed to update user",
+                errors: { server: ["Failed to update user"] }
+            });
         }
     }
 
     async remove(id: string): Promise<User> {
         try {
             const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
-            if (!deletedUser) throw new NotFoundException(`User #${id} not found`);
+            if (!deletedUser) {
+                const message = `User #${id} not found`;
+                throw new NotFoundException({
+                    message,
+                    errors: { user: [message] }
+                });
+            }
             return deletedUser;
         } catch (error) {
             console.error(`Delete User #${id} Error:`, error);
-            throw new InternalServerErrorException('Failed to delete user');
+            throw new InternalServerErrorException({
+                message: "Failed to delete user",
+                errors: { server: ["Failed to delete user"] }
+            });
         }
     }
     async findByEmail(email: string): Promise<User> {
         const user = await this.userModel.findOne({ email }).exec();
-        if (!user) throw new NotFoundException('User not found');
+        if (!user) {
+            throw new NotFoundException({
+                message: "User not found",
+                errors: { user: ["User not found"] }
+            });
+        }
         return user;
     }
 }

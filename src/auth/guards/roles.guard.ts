@@ -1,5 +1,3 @@
-
-
 import {
   CanActivate,
   ExecutionContext,
@@ -21,36 +19,26 @@ export class RolesGuard implements CanActivate {
     );
 
     // If no roles are required, allow access
-    if (!requiredRoles) {
-      return true;
-    }
+    if (!requiredRoles) return true;
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
-
-    // Debug logs (remove in production)
-    console.log('🔐 Required Roles:', requiredRoles);
-    console.log('👤 Authenticated User:', user);
+    const { user } = context.switchToHttp().getRequest();
 
     if (!user) {
-      throw new ForbiddenException('Access denied: User is not authenticated.');
+      throw new ForbiddenException({
+        message: 'Access denied: Authentication required.',
+        errors: { auth: ['User not authenticated'] },
+      });
     }
 
-    if (!user.role) {
-      throw new ForbiddenException(
-        'Access denied: You are not authorized to perform this action.',
-      );
-    }
+    // Always allow ADMIN to access anything
+    if (user.role === UserRole.ADMIN) return true;
 
-    // Always allow ADMIN role to access any resource
-    if (user.role === UserRole.ADMIN) {
-      return true;
-    }
-
+    // Check if user role is in required roles
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException(
-        `Access denied: User role "${user.role}" is not authorized to access this resource.`,
-      );
+      throw new ForbiddenException({
+        message: `Access denied: Role "${user.role}" is not authorized for this resource.`,
+        errors: { role: [`Required roles: ${requiredRoles.join(', ')}`] },
+      });
     }
 
     return true;

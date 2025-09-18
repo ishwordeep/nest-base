@@ -11,33 +11,45 @@ export class AuthService {
         private userService: UserService,
         private jwtService: JwtService
     ) { }
-    async login(dto: LoginDto) {
-        try {
-            const user = await this.userService.findByEmail(dto.email);
+   async login(dto: LoginDto) {
+  try {
+    const user = await this.userService.findByEmail(dto.email);
 
-            if (!user) {
-                throw new UnauthorizedException('Invalid credentials');
-            }
-
-            const isPasswordValid = await bcrypt.compare(dto.password, user.password);
-
-            if (!isPasswordValid) {
-                throw new UnauthorizedException('Invalid credentials');
-            }
-
-            const payload = {
-                sub: user._id,
-                email: user.email,
-                role:user.role
-            };
-
-            // ✅ No need to manually set secret here if JwtModule was configured correctly
-            return {
-                accessToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
-            };
-        } catch (error) {
-            console.error('Login error:', error);
-            throw new UnauthorizedException('Invalid credentials');
-        }
+    if (!user) {
+      throw new UnauthorizedException({
+        message: "Invalid email or password.",
+        errors: { credentials: ["Invalid email or password"] },
+      });
     }
+
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException({
+        message: "Invalid email or password.",
+        errors: { credentials: ["Invalid email or password"] },
+      });
+    }
+
+    const payload = {
+      sub: user._id,
+      email: user.email,
+      role: user.role,
+    };
+
+    return {
+      success: true,
+      message: "Login successful.",
+      data: {
+        accessToken: this.jwtService.sign(payload, { expiresIn: "15m" }),
+      },
+    };
+  } catch (error) {
+    console.error("Login error:", error);
+    throw new UnauthorizedException({
+      message: "Invalid email or password.",
+      errors: { credentials: ["Invalid email or password"] },
+    });
+  }
+}
+
 }
