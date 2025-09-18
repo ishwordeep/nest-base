@@ -57,24 +57,24 @@ export class UserService {
     }
 
     async findOne(id: string): Promise<User> {
+        let userDoc;
+
         try {
-            const user = await this.userModel.findById(id).exec();
-            if (!user) {
-                const message = `User #${id} not found`;
-                throw new NotFoundException({
-                    message,
-                    errors: { user: [message] }
-                });
-            }
-            return user;
-        } catch (error) {
-            console.error(`Find User #${id} Error:`, error);
-            throw new InternalServerErrorException({
-                message: "Failed to fetch user",
-                errors: { server: ["Failed to fetch user"] }
+            userDoc = await this.userModel.findById(id).exec();
+        } catch (err) {
+            const message = `User #${id} not found`;
+            throw new NotFoundException({
+                message,
+                // errors: { message},
             });
         }
+
+
+        // Convert document to plain User
+        return userDoc.toObject() as User;
     }
+
+
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
         try {
             if (updateUserDto.password) {
