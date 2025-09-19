@@ -54,6 +54,7 @@ import {
 //     });
 //   }
 // }
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
