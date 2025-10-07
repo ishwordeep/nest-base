@@ -24,6 +24,8 @@ export class SettingController {
     return this.settingService.findOne();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Patch(':id')
   async updateById(@Param('id') id: string, @Body() dto: UpdateSettingDto) {
     return this.settingService.update(id, dto);

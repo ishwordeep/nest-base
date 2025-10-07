@@ -16,7 +16,7 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post()
-  async create(@Body() createCompanyDto: CreateCompanyDto,@User('_id') userId: string) {
-    return this.companyService.create(createCompanyDto,userId)
+  async create(@Body() createCompanyDto: CreateCompanyDto, @User('_id') userId: string) {
+    return this.companyService.create(createCompanyDto, userId)
   }
 }

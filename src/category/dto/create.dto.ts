@@ -1,0 +1,24 @@
+import { IsBoolean, IsInt, IsOptional, IsString, Matches, Min, IsUrl, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+export class CreateCategoryDto {
+    @IsString()
+    @MaxLength(100)
+    name: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isActive?: boolean;
+
+    @IsOptional()
+    image?: string;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    displayOrder?: number;
+}
