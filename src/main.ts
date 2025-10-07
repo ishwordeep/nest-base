@@ -25,6 +25,8 @@ async function bootstrap() {
       },
     }),
   );
+    app.enableCors();
+
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new ResponseInterceptor());
