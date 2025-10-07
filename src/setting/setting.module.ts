@@ -5,8 +5,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Setting, SettingSchema } from './schema/create.schema';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }])],
+  imports: [MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }])],
   controllers: [SettingController],
   providers: [SettingService],
+  exports:[SettingService]
 })
-export class SettingModule {}
+export class SettingModule { }
