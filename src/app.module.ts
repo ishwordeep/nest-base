@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CompanyModule } from './company/company.module';
 import { SettingModule } from './setting/setting.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SettingModule } from './setting/setting.module';
     UserModule,
     CompanyModule,
     SettingModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
