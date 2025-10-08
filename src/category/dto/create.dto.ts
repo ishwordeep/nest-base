@@ -18,6 +18,9 @@ export class CreateCategoryDto {
     image?: string;
 
     @IsOptional()
+    slug?: string;
+
+    @IsOptional()
     @IsInt()
     @Min(0)
     displayOrder?: number;

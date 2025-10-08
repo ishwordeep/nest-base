@@ -4,6 +4,7 @@ import { FilterQuery, Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from './schema/create.schema';
 import { CreateCategoryDto } from './dto/create.dto';
 import { generateUniqueSlug } from 'src/common/utils/slug.util';
+import { UpdateCategoryDto } from './dto/update.dto';
 
 
 type FindAllQuery = {
@@ -25,6 +26,27 @@ export class CategoryService {
         const categoryData = { ...createCompanyDto, slug };
         return this.categoryModel.create(categoryData);
     }
+    async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<any> {
+        const existingCategory = await this.categoryModel.findById(id);
+
+        if (!existingCategory) {
+            throw new NotFoundException(`Category not found: ${id}`);
+        }
+
+        // If name is being changed, regenerate slug
+        if (updateCategoryDto.name && updateCategoryDto.name !== existingCategory.name) {
+            const newSlug = await generateUniqueSlug(this.categoryModel, updateCategoryDto.name);
+            updateCategoryDto.slug = newSlug;
+        }
+
+        // Update the category
+        const updated = await this.categoryModel
+            .findByIdAndUpdate(id, updateCategoryDto, { new: true, lean: true })
+            .exec();
+
+        return updated;
+    }
+
 
     async findOne(idOrSlug: string): Promise<Category> {
         const isId = Types.ObjectId.isValid(idOrSlug);
