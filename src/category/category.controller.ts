@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseBoolPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/user/schema/user.schema';
@@ -17,6 +17,11 @@ export class CategoryController {
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto)
+  }
+
+  @Get('listonly')
+  async getActiveIdName(@Query('search') search?: string) {
+    return this.categoryService.listActiveIdName(search);
   }
 
   @Get(':idOrSlug')
@@ -46,10 +51,12 @@ export class CategoryController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateCategoryDto:UpdateCategoryDto,
+    @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return await this.categoryService.update(id, updateCategoryDto);
-   
+
   }
+
+
 
 }

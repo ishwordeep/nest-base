@@ -106,4 +106,23 @@ export class CategoryService {
             pages: Math.ceil(total / Math.max(1, limit)) || 1,
         };
     }
+
+    async listActiveIdName(search?: string) {
+        const filter: FilterQuery<CategoryDocument> = { isActive: true };
+
+        if (search?.trim()) {
+            const regex = new RegExp(search.trim(), 'i');
+            filter.$or = [{ name: regex }, { slug: regex }, { description: regex }];
+        }
+
+        const docs = await this.categoryModel
+            .find(filter)
+            .sort({ displayOrder: 1, name: 1 })
+            .select({ _id: 1, name: 1 })
+            .lean();
+
+        return docs.map(d => ({ id: d._id.toString(), name: d.name }));
+    }
+
+
 }

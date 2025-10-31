@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product, ProductDocument } from './schema/create.schema';
@@ -37,6 +37,14 @@ export class ProductService {
     @InjectModel(Category.name)
     private readonly categoryModel: Model<CategoryDocument>,
   ) { }
+
+  private readonly keyToFieldMap = {
+    new: 'isNew',
+    trending: 'isTrending',
+    featured: 'isFeatured',
+  } as const;
+
+
   async create(createProductDto: CreateProductDto): Promise<any> {
     // Always generate a unique slug from the product name
     const slug = await generateUniqueSlug(this.productModel, createProductDto.name);
@@ -205,6 +213,56 @@ export class ProductService {
     };
   }
 
+
+  async updateFlag(ids: string[], flag: 'new' | 'trending' | 'featured') {
+    const field = this.keyToFieldMap[flag];
+    const objectIds = ids.map((id) => new Types.ObjectId(id));
+
+    // 1️⃣ Set all other products to false
+    await this.productModel.updateMany(
+      { _id: { $nin: objectIds } },
+      { $set: { [field]: false } },
+    );
+
+    // 2️⃣ Set selected IDs to true
+    const result = await this.productModel.updateMany(
+      { _id: { $in: objectIds } },
+      { $set: { [field]: true } },
+    );
+
+    return { modifiedCount: result.modifiedCount };
+  }
+
+  async listActiveIdName(search?: string) {
+    const filter: FilterQuery<ProductDocument> = { isActive: true };
+
+    if (search?.trim()) {
+      const regex = new RegExp(search.trim(), 'i');
+      filter.$or = [{ name: regex }, { slug: regex }, { description: regex }];
+    }
+
+    const docs = await this.productModel
+      .find(filter)
+      .sort({ name: 1 })
+      .select({ _id: 1, name: 1 })
+      .lean();
+
+    return docs.map(d => ({ id: d._id.toString(), name: d.name }));
+  }
+
+  async getProductsByFlag(flag: 'new' | 'trending' | 'featured') {
+    const field = this.keyToFieldMap[flag];
+    if (!field) {
+      throw new BadRequestException('Invalid flag provided');
+    }
+
+    const products = await this.productModel
+      .find({ [field]: true }, { _id: 1 }) // return only _id
+      .lean();
+
+    return products.map((p) => p._id);
+
+  }
 
 
 }

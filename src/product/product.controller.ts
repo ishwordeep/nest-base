@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -6,6 +6,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/user/schema/user.schema';
 import { CreateProductDto } from './dto/create.dto';
 import { UpdateProductDto } from './dto/update.dto';
+import { UpdateProductFlagDto } from './dto/update-flags.dto';
 
 @Controller('product')
 export class ProductController {
@@ -25,6 +26,11 @@ export class ProductController {
   ) {
     return await this.productService.update(id, updateProductDto);
 
+  }
+
+  @Get('listonly')
+  async getActiveIdName(@Query('search') search?: string) {
+    return this.productService.listActiveIdName(search);
   }
 
   @Get(':idOrSlug')
@@ -68,4 +74,20 @@ export class ProductController {
       sortOrder,
     });
   }
+
+  @Get('flag/:flag')
+  getProductsByFlag(@Param('flag') flag: 'new' | 'trending' | 'featured') {
+    return this.productService.getProductsByFlag(flag);
+  }
+
+
+  @Patch('update/:flag')
+  updateFlag(
+    @Param('flag') flag: 'new' | 'trending' | 'featured',
+    @Body() dto: UpdateProductFlagDto,
+  ) {
+    return this.productService.updateFlag(dto.ids, flag);
+  }
+
+
 }
