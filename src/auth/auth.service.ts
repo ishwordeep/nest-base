@@ -40,7 +40,7 @@ export class AuthService {
       success: true,
       message: "Login successful.",
       data: {
-        accessToken: this.jwtService.sign(payload, { expiresIn: "15m" }),
+        accessToken: this.jwtService.sign(payload, { expiresIn: "1d" }),
       },
     };
   } catch (error) {
