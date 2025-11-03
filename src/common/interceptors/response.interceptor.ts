@@ -74,6 +74,26 @@ export class ResponseInterceptor implements NestInterceptor {
           payload = rest;
         }
 
+        // If the handler returned a paginated shape with pagination object
+        if (
+          payload &&
+          typeof payload === 'object' &&
+          'data' in payload &&
+          Array.isArray(payload.data) &&
+          'pagination' in payload &&
+          typeof payload.pagination === 'object'
+        ) {
+          const { data, pagination, ...rest } = payload;
+
+          // Return with pagination object
+          return {
+            success: true,
+            data,
+            pagination,
+            message,
+          };
+        }
+
         // If the handler returned a paginated shape like { data: [...], total, page, limit, pages }
         if (
           payload &&
