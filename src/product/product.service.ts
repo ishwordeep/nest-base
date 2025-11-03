@@ -157,10 +157,12 @@ export class ProductService {
           // If category slug not found, return empty result set quickly
           return {
             data: [],
-            total: 0,
-            page: Math.max(1, page),
-            limit: Math.max(1, limit),
-            pages: 1,
+            pagination: {
+              total: 0,
+              page: Math.max(1, page),
+              limit: Math.max(1, limit),
+              pages: 1
+            }
           };
         }
         filter.category = catDoc._id;
@@ -206,10 +208,12 @@ export class ProductService {
 
     return {
       data,
-      total,
-      page: safePage,
-      limit: safeLimit,
-      pages: Math.ceil(total / safeLimit) || 1,
+      pagination: {
+        total,
+        page: safePage,
+        limit: safeLimit,
+        pages: Math.ceil(total / safeLimit) || 1,
+      }
     };
   }
 

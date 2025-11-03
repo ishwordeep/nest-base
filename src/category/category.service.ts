@@ -100,10 +100,12 @@ export class CategoryService {
 
         return {
             data,
-            total,
-            page: Math.max(1, page),
-            limit: Math.max(1, limit),
-            pages: Math.ceil(total / Math.max(1, limit)) || 1,
+            pagination: {
+                total,
+                page: Math.max(1, page),
+                limit: Math.max(1, limit),
+                pages: Math.ceil(total / Math.max(1, limit)) || 1,
+            }
         };
     }
 
