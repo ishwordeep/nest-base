@@ -268,5 +268,40 @@ export class ProductService {
 
   }
 
+ async listByCategoryBasic(categoryIdOrSlug: string) {
+  const filter: FilterQuery<ProductDocument> = { isActive: true };
+
+  if (categoryIdOrSlug?.trim()) {
+    if (Types.ObjectId.isValid(categoryIdOrSlug)) {
+      // Use ObjectId directly
+      filter.category = categoryIdOrSlug;
+    } else {
+      // Resolve by slug
+      const catDoc = await this.categoryModel
+        .findOne({ slug: categoryIdOrSlug.trim() })
+        .select('_id')
+        .lean();
+
+      if (!catDoc?._id) {
+        // Category not found → empty list
+        return [];
+      }
+
+      filter.category = catDoc._id;
+    }
+  }
+
+  // Fetch active products of this category
+  const products = await this.productModel
+    .find(filter)
+    .sort({ displayOrder: 1, createdAt: -1 }) // manual order first, then newest
+    .select({ _id: 1, name: 1, image: 1, price: 1 })
+    .lean();
+
+  return products;
+}
+
+
+
 
 }

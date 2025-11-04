@@ -89,5 +89,10 @@ export class ProductController {
     return this.productService.updateFlag(dto.ids, flag);
   }
 
+  @Get('category/:categoryId')
+  async listByCategory(@Param('categoryId') categoryId: string) {
+    return this.productService.listByCategoryBasic(categoryId);
+  }
+
 
 }
