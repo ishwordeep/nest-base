@@ -251,7 +251,7 @@ export class ProductService {
       .select({ _id: 1, name: 1 })
       .lean();
 
-    return docs.map(d => ({ id: d._id.toString(), name: d.name }));
+    return docs.map(d => ({ _id: d._id.toString(), name: d.name }));
   }
 
   async getProductsByFlag(flag: 'new' | 'trending' | 'featured') {
