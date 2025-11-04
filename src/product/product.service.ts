@@ -261,10 +261,10 @@ export class ProductService {
     }
 
     const products = await this.productModel
-      .find({ [field]: true }, { _id: 1 }) // return only _id
+      .find({ [field]: true }, { _id: 1, name: 1, image: 1 }) // return _id, name, and image
       .lean();
 
-    return products.map((p) => p._id);
+    return products.map((p) => ({ _id: p._id, name: p.name, image: p.image }));
 
   }
 
