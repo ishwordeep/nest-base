@@ -13,6 +13,9 @@ class Button {
 
   @Prop({ required: true, trim: true })
   bgColor: string;
+
+  @Prop({trim: true })
+  url: string;
 }
 
 @Schema({ timestamps: true })

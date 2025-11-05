@@ -14,6 +14,7 @@ import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 import { UploadModule } from './upload/upload.module';
 import { SliderModule } from './slider/slider.module';
+import { FrontendModule } from './frontend/frontend.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SliderModule } from './slider/slider.module';
     ProductModule,
     UploadModule,
     SliderModule,
+    FrontendModule,
   ],
   controllers: [AppController],
   providers: [AppService],

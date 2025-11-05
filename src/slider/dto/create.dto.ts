@@ -22,6 +22,9 @@ export class ButtonDto {
   @IsString()
   @IsNotEmpty()
   bgColor: string;
+
+  @IsString()
+  url: string;
 }
 
 export class CreateSliderDto {
