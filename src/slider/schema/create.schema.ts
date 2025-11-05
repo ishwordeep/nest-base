@@ -35,6 +35,9 @@ export class Slider {
   @Prop({ default: true })
   isActive: boolean;
 
+  @Prop({ default: true })
+  isButtonEnabled: boolean;
+
   @Prop({ type: Button, required: true })
   button: Button;
 }

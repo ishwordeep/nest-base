@@ -49,6 +49,10 @@ export class CreateSliderDto {
   @IsOptional()
   isActive?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  isButtonEnabled?: boolean;
+
   @ValidateNested()
   @Type(() => ButtonDto)
   @IsNotEmpty()
