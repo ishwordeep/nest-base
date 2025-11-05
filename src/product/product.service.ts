@@ -46,6 +46,12 @@ export class ProductService {
 
 
   async create(createProductDto: CreateProductDto): Promise<any> {
+    // Check if the category exists
+    const categoryExists = await this.categoryModel.findById(createProductDto.category).exec();
+    if (!categoryExists) {
+      throw new BadRequestException(`Category with ID ${createProductDto.category} does not exist`);
+    }
+
     // Always generate a unique slug from the product name
     const slug = await generateUniqueSlug(this.productModel, createProductDto.name);
 

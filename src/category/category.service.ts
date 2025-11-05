@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from './schema/create.schema';
@@ -22,29 +22,43 @@ export class CategoryService {
     constructor(@InjectModel(Category.name) private categoryModel: Model<CategoryDocument>) { }
 
     async create(createCompanyDto: CreateCategoryDto): Promise<any> {
-        const slug = await generateUniqueSlug(this.categoryModel, createCompanyDto.name);
-        const categoryData = { ...createCompanyDto, slug };
-        return this.categoryModel.create(categoryData);
+        try {
+            const slug = await generateUniqueSlug(this.categoryModel, createCompanyDto.name);
+            const categoryData = { ...createCompanyDto, slug };
+            return await this.categoryModel.create(categoryData);
+        } catch (error) {
+            if (error.code === 11000 && error.keyPattern?.name) {
+                throw new BadRequestException(`Category with name "${createCompanyDto.name}" already exists`);
+            }
+            throw error;
+        }
     }
     async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<any> {
-        const existingCategory = await this.categoryModel.findById(id);
+        try {
+            const existingCategory = await this.categoryModel.findById(id);
 
-        if (!existingCategory) {
-            throw new NotFoundException(`Category not found: ${id}`);
+            if (!existingCategory) {
+                throw new NotFoundException(`Category not found: ${id}`);
+            }
+
+            // If name is being changed, regenerate slug
+            if (updateCategoryDto.name && updateCategoryDto.name !== existingCategory.name) {
+                const newSlug = await generateUniqueSlug(this.categoryModel, updateCategoryDto.name);
+                updateCategoryDto.slug = newSlug;
+            }
+
+            // Update the category
+            const updated = await this.categoryModel
+                .findByIdAndUpdate(id, updateCategoryDto, { new: true, lean: true })
+                .exec();
+
+            return updated;
+        } catch (error) {
+            if (error.code === 11000 && error.keyPattern?.name) {
+                throw new BadRequestException(`Category with name "${updateCategoryDto.name}" already exists`);
+            }
+            throw error;
         }
-
-        // If name is being changed, regenerate slug
-        if (updateCategoryDto.name && updateCategoryDto.name !== existingCategory.name) {
-            const newSlug = await generateUniqueSlug(this.categoryModel, updateCategoryDto.name);
-            updateCategoryDto.slug = newSlug;
-        }
-
-        // Update the category
-        const updated = await this.categoryModel
-            .findByIdAndUpdate(id, updateCategoryDto, { new: true, lean: true })
-            .exec();
-
-        return updated;
     }
 
 
