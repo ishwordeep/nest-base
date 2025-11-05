@@ -13,6 +13,7 @@ import { SettingModule } from './setting/setting.module';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 import { UploadModule } from './upload/upload.module';
+import { SliderModule } from './slider/slider.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UploadModule } from './upload/upload.module';
     CategoryModule,
     ProductModule,
     UploadModule,
+    SliderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
