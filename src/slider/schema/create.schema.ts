@@ -15,7 +15,7 @@ class Button {
   bgColor: string;
 
   @Prop({trim: true })
-  url: string;
+  link: string;
 }
 
 @Schema({ timestamps: true })

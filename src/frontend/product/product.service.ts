@@ -135,7 +135,7 @@ export class FrontendProductService {
         .sort(sort)
         .skip(skip)
         .limit(safeLimit)
-        .populate('categoryDetails')
+        .populate('categoryDetails', { _id: 1, name: 1 })
         .lean(),
       this.productModel.countDocuments(filter),
     ]);
@@ -170,7 +170,7 @@ export class FrontendProductService {
       .find(filter)
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate('categoryDetails')
+      .populate('categoryDetails', { _id: 1, name: 1 })
       .lean();
 
     return { data };
@@ -192,7 +192,7 @@ export class FrontendProductService {
     const products = await this.productModel
       .find({ category: categoryId, isActive: true })
       .sort({ createdAt: -1 })
-      .populate('categoryDetails')
+      .populate('categoryDetails', { _id: 1, name: 1 })
       .lean();
 
     return { data: products };

@@ -12,11 +12,9 @@ import { Type } from 'class-transformer';
 // Define the Button DTO
 export class ButtonDto {
   @IsString()
-  @IsNotEmpty()
   title: string;
 
   @IsString()
-  @IsNotEmpty()
   textColor: string;
 
   @IsString()
@@ -24,12 +22,12 @@ export class ButtonDto {
   bgColor: string;
 
   @IsString()
-  url: string;
+  link: string;
 }
 
 export class CreateSliderDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   title: string;
 
   @IsString()

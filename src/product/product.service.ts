@@ -61,7 +61,7 @@ export class ProductService {
     // Return with categoryDetails populated, lean object
     const created = await this.productModel
       .findById(doc._id)
-      .populate('categoryDetails')
+      .populate('categoryDetails', { _id: 1, name: 1 })
       .lean()
       .exec();
 
@@ -95,7 +95,7 @@ export class ProductService {
         lean: true,
         runValidators: true, // enforce validation
       })
-      .populate('categoryDetails')
+      .populate('categoryDetails', { _id: 1, name: 1 })
       .exec();
 
     return updated;
@@ -105,8 +105,8 @@ export class ProductService {
     const isId = Types.ObjectId.isValid(idOrSlug);
 
     const doc = isId
-      ? await this.productModel.findById(idOrSlug).populate('categoryDetails').lean()
-      : await this.productModel.findOne({ slug: idOrSlug }).populate('categoryDetails').lean();
+      ? await this.productModel.findById(idOrSlug).populate('categoryDetails', { _id: 1, name: 1 }).lean()
+      : await this.productModel.findOne({ slug: idOrSlug }).populate('categoryDetails', { _id: 1, name: 1 }).lean();
 
     if (!doc) {
       throw new NotFoundException(`Product not found: ${idOrSlug}`);
@@ -207,7 +207,8 @@ export class ProductService {
         .sort(sort)
         .skip(skip)
         .limit(safeLimit)
-        .populate('categoryDetails')
+        .select({ name: 1, category: 1, image: 1, price: 1, discount: 1,isActive:1 })
+        .populate('categoryDetails', { _id: 1, name: 1 })
         .lean(),
       this.productModel.countDocuments(filter),
     ]);
