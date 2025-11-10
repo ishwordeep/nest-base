@@ -29,20 +29,20 @@ export class FrontendProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
-  ) {}
+  ) { }
 
-  // async findOne(idOrSlug: string): Promise<Product> {
-  //   // Only return active products for frontend
-  //   const doc = Types.ObjectId.isValid(idOrSlug)
-  //     ? await this.productModel.findOne({ _id: idOrSlug, isActive: true }).populate('categoryDetails').lean()
-  //     : await this.productModel.findOne({ slug: idOrSlug, isActive: true }).populate('categoryDetails').lean();
+  async findOne(idOrSlug: string) {
+    // Only return active products for frontend
+    const doc = Types.ObjectId.isValid(idOrSlug)
+      ? await this.productModel.findOne({ _id: idOrSlug, isActive: true }).populate('categoryDetails').lean()
+      : await this.productModel.findOne({ slug: idOrSlug, isActive: true }).populate('categoryDetails').lean();
 
-  //   if (!doc) {
-  //     return null;
-  //   }
+    if (!doc) {
+      return null;
+    }
 
-  //   return doc as unknown as Product;
-  // }
+    return doc as unknown as Product;
+  }
 
   async findAll(q: FindAllProductsQuery = {}) {
     const {

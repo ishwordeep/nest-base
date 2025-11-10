@@ -5,10 +5,10 @@ import { FrontendProductService } from './product.service';
 export class FrontendProductController {
   constructor(private readonly productService: FrontendProductService) {}
 
-  // @Get(':idOrSlug')
-  // async findOne(@Param('idOrSlug') idOrSlug: string) {
-  //   return this.productService.findOne(idOrSlug);
-  // }
+  @Get(':idOrSlug')
+  async findOne(@Param('idOrSlug') idOrSlug: string) {
+    return this.productService.findOne(idOrSlug);
+  }
 
   @Get()
   async findAll(
