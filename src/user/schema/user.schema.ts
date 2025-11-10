@@ -4,7 +4,8 @@ import { Document } from "mongoose";
 export enum UserRole {
     ADMIN = 'ADMIN',
     STAFF = 'STAFF',
-    USER = 'USER'
+    USER = 'USER',
+    CUSTOMER = 'CUSTOMER'
 }
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -14,9 +15,14 @@ export class User extends Document {
     @Prop({ required: true })
     password: string
 
+    @Prop({})
+    phone: string
+
+    @Prop({})
+    name: string
+
     @Prop({ type: String, enum: UserRole, default: UserRole.USER })
     role: UserRole;
-
 
 }
 export const UserSchema = SchemaFactory.createForClass(User);
