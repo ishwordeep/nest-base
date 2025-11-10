@@ -15,6 +15,7 @@ import { ProductModule } from './product/product.module';
 import { UploadModule } from './upload/upload.module';
 import { SliderModule } from './slider/slider.module';
 import { FrontendModule } from './frontend/frontend.module';
+import { HomepageSectionModule } from './homepage-section/homepage-section.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FrontendModule } from './frontend/frontend.module';
     UploadModule,
     SliderModule,
     FrontendModule,
+    HomepageSectionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
