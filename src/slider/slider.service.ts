@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateSliderDto } from './dto/create.dto';
@@ -9,12 +9,23 @@ import { Slider, SliderDocument } from './schema/create.schema';
 export class SliderService {
   constructor(
     @InjectModel(Slider.name) private sliderModel: Model<SliderDocument>,
-  ) {}
+  ) { }
 
   async create(createSliderDto: CreateSliderDto): Promise<Slider> {
+  try {
+    // If isButtonEnabled is false, remove the button object before saving
+    if (createSliderDto.isButtonEnabled === false) {
+      delete createSliderDto.button;
+    }
+
     const createdSlider = new this.sliderModel(createSliderDto);
-    return createdSlider.save();
+    return await createdSlider.save();
+  } catch (error) {
+    console.error('Error creating slider:', error);
+    throw new BadRequestException(error.message || 'Error creating slider');
   }
+  }
+
 
   async findAll(activeOnly: boolean = false): Promise<Slider[]> {
     const query = activeOnly ? { isActive: true } : {};
@@ -33,25 +44,25 @@ export class SliderService {
     const updatedSlider = await this.sliderModel
       .findByIdAndUpdate(id, updateSliderDto, { new: true })
       .exec();
-    
+
     if (!updatedSlider) {
       throw new NotFoundException(`Slider with ID ${id} not found`);
     }
-    
+
     return updatedSlider;
   }
 
   async remove(id: string): Promise<Slider> {
     const deletedSlider = await this.sliderModel.findByIdAndDelete(id).exec();
-    
+
     if (!deletedSlider) {
       throw new NotFoundException(`Slider with ID ${id} not found`);
     }
-    
+
     return deletedSlider;
   }
 
-   
 
-  
+
+
 }

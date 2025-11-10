@@ -20,7 +20,7 @@ class Button {
 
 @Schema({ timestamps: true })
 export class Slider {
-  @Prop({ required: true, trim: true })
+  @Prop({ required: false, trim: true })
   title: string;
 
   @Prop({ required: false, trim: true })
@@ -29,7 +29,7 @@ export class Slider {
   @Prop({ required: true, trim: true })
   image: string;
 
-  @Prop({ required: true, default: 0 })
+  @Prop({ required: false, default: 0 })
   displayOrder: number;
 
   @Prop({ default: true })

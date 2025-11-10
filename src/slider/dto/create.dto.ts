@@ -12,16 +12,19 @@ import { Type } from 'class-transformer';
 // Define the Button DTO
 export class ButtonDto {
   @IsString()
+  @IsOptional()
   title: string;
 
   @IsString()
+  @IsOptional()
   textColor: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   bgColor: string;
 
   @IsString()
+  @IsOptional()
   link: string;
 }
 
@@ -51,8 +54,8 @@ export class CreateSliderDto {
   @IsOptional()
   isButtonEnabled?: boolean;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => ButtonDto)
-  @IsNotEmpty()
-  button: ButtonDto;
+  button?: ButtonDto;
 }
