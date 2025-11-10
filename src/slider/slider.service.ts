@@ -12,18 +12,17 @@ export class SliderService {
   ) { }
 
   async create(createSliderDto: CreateSliderDto): Promise<Slider> {
-  try {
-    // If isButtonEnabled is false, remove the button object before saving
-    if (createSliderDto.isButtonEnabled === false) {
-      delete createSliderDto.button;
-    }
+    try {
+      if (createSliderDto.isButtonEnabled === false) {
+        delete createSliderDto.button;
+      }
 
-    const createdSlider = new this.sliderModel(createSliderDto);
-    return await createdSlider.save();
-  } catch (error) {
-    console.error('Error creating slider:', error);
-    throw new BadRequestException(error.message || 'Error creating slider');
-  }
+      const createdSlider = new this.sliderModel(createSliderDto);
+      return await createdSlider.save();
+    } catch (error) {
+      console.error('Error creating slider:', error);
+      throw new BadRequestException(error.message || 'Error creating slider');
+    }
   }
 
 
