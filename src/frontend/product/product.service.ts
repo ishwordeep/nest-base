@@ -160,7 +160,7 @@ export class FrontendProductService {
 
     const field = flagMap[flag];
     if (!field) {
-      return { data: [] };
+      return [];
     }
 
     const filter: FilterQuery<ProductDocument> = { isActive: true };
@@ -173,7 +173,7 @@ export class FrontendProductService {
       .populate('categoryDetails', { _id: 1, name: 1 })
       .lean();
 
-    return { data };
+    return data;
   }
 
   async listByCategoryBasic(categoryIdOrSlug: string) {
@@ -195,6 +195,6 @@ export class FrontendProductService {
       .populate('categoryDetails', { _id: 1, name: 1 })
       .lean();
 
-    return { data: products };
+    return products;
   }
 }
