@@ -7,6 +7,8 @@ import { FrontendSliderController } from './slider/slider.controller';
 import { FrontendSliderService } from './slider/slider.service';
 import { FrontendProductController } from './product/product.controller';
 import { FrontendProductService } from './product/product.service';
+import { FrontendCategoryController } from './category/category.controller';
+import { FrontendCategoryService } from './category/category.service';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { FrontendProductService } from './product/product.service';
       { name: Category.name, schema: CategorySchema },
     ]),
   ],
-  controllers: [FrontendSliderController, FrontendProductController],
-  providers: [FrontendSliderService, FrontendProductService],
+  controllers: [FrontendSliderController, FrontendProductController, FrontendCategoryController],
+  providers: [FrontendSliderService, FrontendProductService, FrontendCategoryService],
 })
 export class FrontendModule {}

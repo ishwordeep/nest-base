@@ -40,15 +40,24 @@ export class SliderService {
   }
 
   async update(id: string, updateSliderDto: UpdateSliderDto): Promise<Slider> {
-    const updatedSlider = await this.sliderModel
-      .findByIdAndUpdate(id, updateSliderDto, { new: true })
-      .exec();
+    try {
+      if (updateSliderDto.isButtonEnabled === false) {
+        delete updateSliderDto.button;
+      }
 
-    if (!updatedSlider) {
-      throw new NotFoundException(`Slider with ID ${id} not found`);
+      const updatedSlider = await this.sliderModel
+        .findByIdAndUpdate(id, updateSliderDto, { new: true })
+        .exec();
+
+      if (!updatedSlider) {
+        throw new NotFoundException(`Slider with ID ${id} not found`);
+      }
+
+      return updatedSlider;
+    } catch (error) {
+      console.error('Error updating slider:', error);
+      throw new BadRequestException(error.message || 'Error updating slider');
     }
-
-    return updatedSlider;
   }
 
   async remove(id: string): Promise<Slider> {

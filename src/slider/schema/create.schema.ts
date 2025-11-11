@@ -5,16 +5,16 @@ export type SliderDocument = Slider & Document;
 
 // Define the Button interface
 class Button {
-  @Prop({ required: true, trim: true })
+  @Prop({ required: false, trim: true })
   title: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: false, trim: true })
   textColor: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: false, trim: true })
   bgColor: string;
 
-  @Prop({trim: true })
+  @Prop({ required: false, trim: true })
   link: string;
 }
 
@@ -38,7 +38,7 @@ export class Slider {
   @Prop({ default: true })
   isButtonEnabled: boolean;
 
-  @Prop({ type: Button, required: true })
+  @Prop({ type: Button, required: false })
   button: Button;
 }
 
