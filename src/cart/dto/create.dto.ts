@@ -41,8 +41,8 @@ class CartItemDto {
 
 export class CreateCartDto {
   @IsMongoId()
-  @IsNotEmpty()
-  userId: Types.ObjectId;
+  @IsOptional()
+  userId?: Types.ObjectId;
 
   @IsArray()
   @ArrayMinSize(1)
