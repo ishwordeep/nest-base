@@ -12,8 +12,14 @@ import {
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 
-class CartItemDto {
+ 
+
+export class CreateCartDto {
   @IsMongoId()
+  @IsOptional()
+  userId?: Types.ObjectId;
+
+ @IsMongoId()
   @IsNotEmpty()
   productId: Types.ObjectId;
 
@@ -23,7 +29,8 @@ class CartItemDto {
 
   @IsNumber()
   @Min(0)
-  price: number;
+  @IsOptional()
+  price?: number;
 
   @IsNumber()
   @Min(0)
@@ -37,16 +44,4 @@ class CartItemDto {
   @IsString()
   @IsOptional()
   size?: string;
-}
-
-export class CreateCartDto {
-  @IsMongoId()
-  @IsOptional()
-  userId?: Types.ObjectId;
-
-  @IsArray()
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true })
-  @Type(() => CartItemDto)
-  items: CartItemDto[];
 }

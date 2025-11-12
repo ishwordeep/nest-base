@@ -12,80 +12,65 @@ export class CartService {
     private readonly productService: ProductService,
   ) { }
 
-  async create(createCartDto: CreateCartDto) {
-    try {
-      // ✅ Validate products
-      for (const item of createCartDto.items) {
-        try {
-          await this.productService.findOne(item.productId.toString());
-        } catch (error) {
-          if (error instanceof NotFoundException) {
-            throw new BadRequestException(
-              `Product with ID ${item.productId} does not exist`,
-            );
-          }
-          throw error;
-        }
-      }
+ async create(createCartDto: CreateCartDto) {
+  try {
+    const { userId, productId, quantity, color, size } = createCartDto;
 
-      // ✅ Calculate totals
-      let totalPrice = 0;
-      let totalDiscount = 0;
+    // 1️⃣ Validate product
+    const product = await this.productService.findOne(productId.toString());
+    if (!product.isActive) throw new BadRequestException('Product is not available');
 
-      for (const item of createCartDto.items) {
-        const price = item.price || 0;
-        const discount = item.discount || 0;
-        totalPrice += price * item.quantity;
-        totalDiscount += discount * item.quantity;
-      }
+    const qty = Math.max(1, Number(quantity ?? 1));
+    const price = product.price ?? 0;
+    const discount = product.discount ?? 0;
 
-      // ✅ Create and save cart
-      const cart = new this.cartModel({
-        ...createCartDto,
-        totalPrice,
-        totalDiscount,
-        isOrdered: false,
+    // 2️⃣ Find or create cart
+    let cart = await this.cartModel.findOne({ userId });
+
+    if (!cart) {
+      cart = await this.cartModel.create({
+        userId,
+        items: [
+          {
+            productId,
+            quantity: qty,
+            price,
+            discount,
+            color,
+            size,
+          },
+        ]
       });
+    } else {
+      // 3️⃣ Merge with existing line
+      const idx = cart.items.findIndex(
+        (i) =>
+          i.productId.toString() === productId.toString() &&
+          (i.color ?? null) === (color ?? null) &&
+          (i.size ?? null) === (size ?? null),
+      );
+
+      if (idx > -1) {
+        cart.items[idx].quantity += qty;
+        cart.items[idx].price = price;
+        (cart.items[idx] as any).discount = discount;
+      } else {
+        cart.items.push({ productId, quantity: qty, price, discount, color, size } as any);
+      }
 
       await cart.save();
-
-      // ✅ Populate product details and return
-      return await this.cartModel
-        .findById(cart._id)
-        .populate('productDetails')
-        .exec();
-    } catch (error) {
-      if (error.name === 'ValidationError') {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
     }
-  }
 
-
-  async findOne(id: string): Promise<Cart> {
-    try {
-      // Validate if the id is a valid ObjectId
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException('Invalid cart ID');
-      }
-
-      const cart = await this.cartModel.findById(id)
-        .populate('productDetails')
-        .exec();
-
-      if (!cart) {
-        throw new NotFoundException(`Cart with ID ${id} not found`);
-      }
-
-      return cart;
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
+    // 4️⃣ Return populated
+    return this.cartModel.findById(cart._id).populate('productDetails').exec();
+  } catch (error: any) {
+    if (error?.name === 'ValidationError') {
       throw new BadRequestException(error.message);
     }
+    throw error;
   }
+}
+
 
   async findByUserId(userId: string): Promise<Cart[]> {
     try {

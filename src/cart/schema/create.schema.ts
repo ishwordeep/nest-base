@@ -26,20 +26,12 @@ export class Cart {
     color?: string;
     size?: string;
   }[];
-
-  @Prop({ default: 0 })
-  totalPrice: number;
-
-  @Prop({ default: 0 })
-  totalDiscount: number;
-
-  @Prop({ default: false })
-  isOrdered: boolean;
+ 
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
 
- 
+
 
 /* ✅ Virtual to populate product details */
 CartSchema.virtual('productDetails', {
