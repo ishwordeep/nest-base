@@ -21,8 +21,6 @@ export class CartService {
     if (!product.isActive) throw new BadRequestException('Product is not available');
 
     const qty = Math.max(1, Number(quantity ?? 1));
-    const price = product.price ?? 0;
-    const discount = product.discount ?? 0;
 
     // 2️⃣ Find or create cart
     let cart = await this.cartModel.findOne({ userId });
@@ -34,8 +32,6 @@ export class CartService {
           {
             productId,
             quantity: qty,
-            price,
-            discount,
             color,
             size,
           },
@@ -52,10 +48,8 @@ export class CartService {
 
       if (idx > -1) {
         cart.items[idx].quantity += qty;
-        cart.items[idx].price = price;
-        (cart.items[idx] as any).discount = discount;
       } else {
-        cart.items.push({ productId, quantity: qty, price, discount, color, size } as any);
+        cart.items.push({ productId, quantity: qty, color, size } as any);
       }
 
       await cart.save();
@@ -72,23 +66,49 @@ export class CartService {
 }
 
 
-  async findByUserId(userId: string): Promise<Cart[]> {
-    try {
-      // Validate if the userId is a valid ObjectId
-      if (!Types.ObjectId.isValid(userId)) {
-        throw new BadRequestException('Invalid user ID');
-      }
-
-      const carts = await this.cartModel.find({ userId: new Types.ObjectId(userId) })
-        .populate('productDetails')
-        .exec();
-
-      return carts;
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new BadRequestException(error.message);
+  async findByUserId(userId: string)/*: Promise<any[]>*/ {
+  try {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
     }
+
+    // Populate only what you need from Product
+    const carts = await this.cartModel
+      .find({ userId: new Types.ObjectId(userId) })
+      .populate({
+        path: 'items.productId',
+        select: 'name image price discount', // only these fields
+      })
+      .lean() // easier to reshape the response
+      .exec();
+
+    // Shape the response: fold product fields into each item
+    const shaped = carts.map((cart) => ({
+      _id: cart._id,
+      userId: cart.userId,
+      createdAt: cart.createdAt,
+      updatedAt: cart.updatedAt,
+      items: cart.items.map((it: any) => {
+        const p = it.productId || {};
+        return {
+          productId: p._id ?? it.productId, // keep id
+          quantity: it.quantity,
+          color: it.color,
+          size: it.size,
+          // product fields inlined from Product model:
+          name: p.name,
+          image: p.image,
+          price: p.price,
+          discount: p.discount,
+        };
+      }),
+    }));
+
+    return shaped;
+  } catch (error: any) {
+    if (error instanceof BadRequestException) throw error;
+    throw new BadRequestException(error.message);
   }
+}
+
 }

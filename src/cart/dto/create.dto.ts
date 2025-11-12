@@ -12,7 +12,7 @@ import {
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 
- 
+
 
 export class CreateCartDto {
   @IsMongoId()
@@ -27,15 +27,6 @@ export class CreateCartDto {
   @Min(1)
   quantity: number;
 
-  @IsNumber()
-  @Min(0)
-  @IsOptional()
-  price?: number;
-
-  @IsNumber()
-  @Min(0)
-  @IsOptional()
-  discount?: number;
 
   @IsString()
   @IsOptional()

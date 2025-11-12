@@ -12,8 +12,6 @@ export class Cart {
     {
       productId: { type: Types.ObjectId, ref: 'Product', required: true },
       quantity: { type: Number, required: true, min: 1, default: 1 },
-      price: { type: Number, required: true, min: 0 }, // base price
-      discount: { type: Number, default: 0 },          // per item discount (if any)
       color: { type: String },
       size: { type: String },
     },
@@ -21,12 +19,13 @@ export class Cart {
   items: {
     productId: Types.ObjectId;
     quantity: number;
-    price: number;
-    discount?: number;
     color?: string;
     size?: string;
   }[];
- 
+
+  // Automatically added by Mongoose with timestamps: true
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
@@ -68,4 +67,3 @@ CartSchema.set('toObject', {
     return ret;
   },
 });
-
