@@ -55,8 +55,11 @@ export class CartService {
       await cart.save();
     }
 
-    // 4️⃣ Return populated
-    return this.cartModel.findById(cart._id).exec();
+    // 4️⃣ Return success message instead of populated cart
+    return {
+      success: true,
+      message: "Item added to cart successfully."
+    };
   } catch (error: any) {
     if (error?.name === 'ValidationError') {
       throw new BadRequestException(error.message);
