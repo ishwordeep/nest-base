@@ -16,6 +16,7 @@ import { UploadModule } from './upload/upload.module';
 import { SliderModule } from './slider/slider.module';
 import { FrontendModule } from './frontend/frontend.module';
 import { HomepageSectionModule } from './homepage-section/homepage-section.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { HomepageSectionModule } from './homepage-section/homepage-section.modul
     SliderModule,
     FrontendModule,
     HomepageSectionModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],
