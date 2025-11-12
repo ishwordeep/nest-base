@@ -24,4 +24,7 @@ export class CreateShippingAddressDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  @IsOptional()
+  isDefault?: boolean;
 }

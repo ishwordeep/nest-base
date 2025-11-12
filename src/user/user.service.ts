@@ -87,7 +87,6 @@ export class UserService {
         }
     }
 
-     
     async findByEmail(email: string): Promise<User> {
         const user = await this.userModel.findOne({ email }).exec();
         if (!user) {
@@ -106,16 +105,48 @@ export class UserService {
                 throw new NotFoundException(`User #${userId} not found`);
             }
 
-            // Set default country if not provided
-            if (!createShippingAddressDto.country) {
-                createShippingAddressDto.country = 'USA';
+            
+
+            // Handle isDefault flag
+            const isNewAddressDefault = createShippingAddressDto.isDefault === true;
+
+            // Get current addresses or initialize empty array
+            const currentAddresses = user.shippingAddresses || [];
+
+            // Create update operation based on isDefault flag
+            let updateOperation;
+
+            if (isNewAddressDefault) {
+                // If new address is default, set all existing addresses to non-default
+                // and add the new address as default
+                updateOperation = {
+                    $set: {
+                        'shippingAddresses.$[].isDefault': false
+                    },
+                    $push: {
+                        shippingAddresses: { ...createShippingAddressDto, isDefault: true }
+                    }
+                };
+            } else {
+                // If no addresses exist yet, make this one default regardless of input
+                const shouldMakeDefault = currentAddresses.length === 0;
+
+                // Add the new address (default only if it's the first address)
+                updateOperation = {
+                    $push: {
+                        shippingAddresses: { 
+                            ...createShippingAddressDto, 
+                            isDefault: shouldMakeDefault 
+                        }
+                    }
+                };
             }
 
             // Update the user with the new shipping address
             const updatedUser = await this.userModel
                 .findByIdAndUpdate(
                     userId,
-                    { shippingAddress: createShippingAddressDto },
+                    updateOperation,
                     { new: true }
                 )
                 .exec();

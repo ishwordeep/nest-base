@@ -26,6 +26,9 @@ export class ShippingAddress {
 
     @Prop({ default: 'USA' })
     country: string;
+
+    @Prop({ default: false })
+    isDefault: boolean;
 }
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -44,7 +47,7 @@ export class User extends Document {
     @Prop({ type: String, enum: UserRole, default: UserRole.USER })
     role: UserRole;
 
-    @Prop({ type: ShippingAddress })
-    shippingAddress?: ShippingAddress;
+    @Prop({ type: [ShippingAddress], default: [] })
+    shippingAddresses: ShippingAddress[];
 }
 export const UserSchema = SchemaFactory.createForClass(User);
