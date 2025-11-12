@@ -41,5 +41,31 @@ CartSchema.virtual('productDetails', {
 });
 
 /* ✅ Include virtuals in outputs */
-CartSchema.set('toObject', { virtuals: true });
-CartSchema.set('toJSON', { virtuals: true });
+// Disable Mongoose's virtual `id`
+CartSchema.set('id', false);
+
+CartSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_doc, ret: any) => {
+    // TS-safe because ret is any
+    delete ret.id;
+    if (Array.isArray(ret.items)) {
+      ret.items.forEach((i: any) => delete i.id);
+    }
+    return ret;
+  },
+});
+
+CartSchema.set('toObject', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_doc, ret: any) => {
+    delete ret.id;
+    if (Array.isArray(ret.items)) {
+      ret.items.forEach((i: any) => delete i.id);
+    }
+    return ret;
+  },
+});
+

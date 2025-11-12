@@ -62,7 +62,7 @@ export class CartService {
     }
 
     // 4️⃣ Return populated
-    return this.cartModel.findById(cart._id).populate('productDetails').exec();
+    return this.cartModel.findById(cart._id).exec();
   } catch (error: any) {
     if (error?.name === 'ValidationError') {
       throw new BadRequestException(error.message);
