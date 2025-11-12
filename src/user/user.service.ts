@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateShippingAddressDto } from './dto/create-shipping-address.dto';
 
 @Injectable()
 export class UserService {
@@ -95,5 +96,40 @@ export class UserService {
             });
         }
         return user;
+    }
+
+    async createShippingAddress(userId: string, createShippingAddressDto: CreateShippingAddressDto){
+        try {
+            const user = await this.userModel.findById(userId).exec();
+
+            if (!user) {
+                throw new NotFoundException(`User #${userId} not found`);
+            }
+
+            // Set default country if not provided
+            if (!createShippingAddressDto.country) {
+                createShippingAddressDto.country = 'USA';
+            }
+
+            // Update the user with the new shipping address
+            const updatedUser = await this.userModel
+                .findByIdAndUpdate(
+                    userId,
+                    { shippingAddress: createShippingAddressDto },
+                    { new: true }
+                )
+                .exec();
+
+            return updatedUser;
+        } catch (error) {
+            console.error(`Create Shipping Address for User #${userId} Error:`, error);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException({
+                message: "Failed to create shipping address",
+                errors: { server: ["Failed to create shipping address"] }
+            });
+        }
     }
 }
