@@ -86,4 +86,24 @@ export class CartService {
       throw new BadRequestException(error.message);
     }
   }
+
+  async findByUserId(userId: string): Promise<Cart[]> {
+    try {
+      // Validate if the userId is a valid ObjectId
+      if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+      }
+
+      const carts = await this.cartModel.find({ userId: new Types.ObjectId(userId) })
+        .populate('productDetails')
+        .exec();
+
+      return carts;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
 }

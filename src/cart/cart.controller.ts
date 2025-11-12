@@ -21,9 +21,13 @@ export class CartController {
     return this.cartService.create(createCartDto);
   }
 
-  @Get(':id')
+  @Get()
   @UseGuards(JwtAuthGuard)
-  async findOne(@Param('id') id: string){
-    return this.cartService.findOne(id);
+  async findByUserId(@Request() req) {
+    // Extract userId from JWT token
+    const userId = req.user.sub;
+    return this.cartService.findByUserId(userId);
   }
+
+ 
 }
