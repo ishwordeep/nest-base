@@ -69,15 +69,15 @@ export class CartService {
 }
 
 
-  async findByUserId(userId: string)/*: Promise<any[]>*/ {
+  async findByUserId(userId: string)/*: Promise<any>*/ {
   try {
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
 
     // Populate only what you need from Product
-    const carts = await this.cartModel
-      .find({ userId: new Types.ObjectId(userId) })
+    const cart = await this.cartModel
+      .findOne({ userId: new Types.ObjectId(userId) })
       .populate({
         path: 'items.productId',
         select: 'name image price discount', // only these fields
@@ -85,8 +85,12 @@ export class CartService {
       .lean() // easier to reshape the response
       .exec();
 
+    if (!cart) {
+      return { data: { data: null } };
+    }
+
     // Shape the response: fold product fields into each item
-    const shaped = carts.map((cart) => ({
+    const shaped = {
       _id: cart._id,
       userId: cart.userId,
       createdAt: cart.createdAt,
@@ -105,9 +109,9 @@ export class CartService {
           discount: p.discount,
         };
       }),
-    }));
+    };
 
-    return shaped;
+    return shaped  ;
   } catch (error: any) {
     if (error instanceof BadRequestException) throw error;
     throw new BadRequestException(error.message);
