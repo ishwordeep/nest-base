@@ -24,9 +24,11 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  findOne(@Request() req) {
+    const userId = req.user.sub;
+    return this.userService.findOne(userId);
   }
 
   @Put(':id')
