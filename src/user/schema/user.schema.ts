@@ -8,6 +8,7 @@ export enum UserRole {
     CUSTOMER = 'CUSTOMER'
 }
 
+@Schema()
 export class ShippingAddress {
     @Prop({ required: false })
     street: string;
@@ -18,7 +19,7 @@ export class ShippingAddress {
     @Prop({ required: false })
     city: string;
 
-    @Prop({ required: false, minlength: 2, maxlength: 2 })
+    @Prop({ required: false })
     state: string;
 
     @Prop({ required: false })
@@ -50,4 +51,5 @@ export class User extends Document {
     @Prop({ type: [ShippingAddress], default: [] })
     shippingAddresses: ShippingAddress[];
 }
+export const ShippingAddressSchema = SchemaFactory.createForClass(ShippingAddress);
 export const UserSchema = SchemaFactory.createForClass(User);

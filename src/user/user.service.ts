@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './schema/user.schema';
+import { ShippingAddress, User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
@@ -97,70 +97,55 @@ export class UserService {
         return user;
     }
 
-    async createShippingAddress(userId: string, createShippingAddressDto: CreateShippingAddressDto){
-        try {
-            const user = await this.userModel.findById(userId).exec();
+   async createShippingAddress(userId: string, dto: CreateShippingAddressDto) {
+    try {
+        const user = await this.userModel.findById(userId);
 
-            if (!user) {
-                throw new NotFoundException(`User #${userId} not found`);
-            }
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
 
-            
+        // Determine if this new address should be default
+        let shouldBeDefault = dto.isDefault ?? false;
 
-            // Handle isDefault flag
-            const isNewAddressDefault = createShippingAddressDto.isDefault === true;
+        // If user has no default address yet, force this one to be default
+        const hasDefaultAlready = user.shippingAddresses.some(
+            (addr) => addr.isDefault === true,
+        );
 
-            // Get current addresses or initialize empty array
-            const currentAddresses = user.shippingAddresses || [];
+        if (!hasDefaultAlready) {
+            shouldBeDefault = true;
+        }
 
-            // Create update operation based on isDefault flag
-            let updateOperation;
-
-            if (isNewAddressDefault) {
-                // If new address is default, set all existing addresses to non-default
-                // and add the new address as default
-                updateOperation = {
-                    $set: {
-                        'shippingAddresses.$[].isDefault': false
-                    },
-                    $push: {
-                        shippingAddresses: { ...createShippingAddressDto, isDefault: true }
-                    }
-                };
-            } else {
-                // If no addresses exist yet, make this one default regardless of input
-                const shouldMakeDefault = currentAddresses.length === 0;
-
-                // Add the new address (default only if it's the first address)
-                updateOperation = {
-                    $push: {
-                        shippingAddresses: { 
-                            ...createShippingAddressDto, 
-                            isDefault: shouldMakeDefault 
-                        }
-                    }
-                };
-            }
-
-            // Update the user with the new shipping address
-            const updatedUser = await this.userModel
-                .findByIdAndUpdate(
-                    userId,
-                    updateOperation,
-                    { new: true }
-                )
-                .exec();
-
-            return updatedUser;
-        } catch (error) {
-            console.error(`Create Shipping Address for User #${userId} Error:`, error);
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-            throw new InternalServerErrorException({
-                message: "Failed to create shipping address",
-                errors: { server: ["Failed to create shipping address"] }
+        // If this address is default, unset default on all existing addresses
+        if (shouldBeDefault) {
+            user.shippingAddresses.forEach((addr) => {
+                addr.isDefault = false;
             });
         }
+
+        const newAddress = {
+            street: dto.street,
+            apartment: dto.apartment,
+            city: dto.city,
+            state: dto.state,
+            zipCode: dto.zipCode,
+            country: dto.country ?? 'USA',
+            isDefault: shouldBeDefault,
+        };
+
+        console.log("newAddress:", newAddress);
+
+        user.shippingAddresses.push(newAddress as any);
+
+        await user.save();
+
+        return user.shippingAddresses[user.shippingAddresses.length - 1];
+    } catch (error) {
+        console.error("❌ ERROR in createShippingAddress:", error);
+        console.error("STACK TRACE:", error.stack);
+        throw error; // rethrow so Nest handles it
     }
+}
+
 }

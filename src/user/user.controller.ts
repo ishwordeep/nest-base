@@ -43,6 +43,7 @@ export class UserController {
     @Body() createShippingAddressDto: CreateShippingAddressDto,
   ) {
     const userId = req.user.sub;
+    console.log("user:",userId);
     return this.userService.createShippingAddress(userId, createShippingAddressDto);
   }
 
