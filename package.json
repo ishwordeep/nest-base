@@ -20,7 +20,11 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed:admin": "ts-node -r tsconfig-paths/register src/seeds/admin.seed.ts",
     "seed:setting": "ts-node -r tsconfig-paths/register src/seeds/setting.seed.ts",
-    "seed:homesection": "ts-node -r tsconfig-paths/register src/seeds/homepage-section.seed.ts"
+    "seed:homesection": "ts-node -r tsconfig-paths/register src/seeds/homepage-section.seed.ts",
+    "seed:category": "ts-node -r tsconfig-paths/register src/seeds/category.seed.ts",
+    "seed:product": "ts-node -r tsconfig-paths/register src/seeds/product.seed.ts",
+    "seed:slider": "ts-node -r tsconfig-paths/register src/seeds/slider.seed.ts",
+    "seed:all": "npm run seed:category && npm run seed:product && npm run seed:slider"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
