@@ -17,6 +17,7 @@ export class Cart {
     },
   ])
   items: {
+    _id?: Types.ObjectId;
     productId: Types.ObjectId;
     quantity: number;
     color?: string;

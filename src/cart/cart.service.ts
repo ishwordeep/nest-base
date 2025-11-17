@@ -118,4 +118,41 @@ export class CartService {
   }
 }
 
+  async deleteItem(userId: string, itemId: string) {
+    try {
+      if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+      }
+
+      const cart = await this.cartModel.findOne({ userId: new Types.ObjectId(userId) });
+
+      if (!cart) {
+        throw new NotFoundException('Cart not found');
+      }
+
+      // Find the item index in the cart
+      const itemIndex = cart.items.findIndex(item => item._id && item._id.toString() === itemId);
+
+      if (itemIndex === -1) {
+        throw new NotFoundException('Item not found in cart');
+      }
+
+      // Remove the item from the cart
+      cart.items.splice(itemIndex, 1);
+
+      // Save the updated cart
+      await cart.save();
+
+      return {
+        success: true,
+        message: 'Item removed from cart successfully'
+      };
+    } catch (error: any) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
+
 }

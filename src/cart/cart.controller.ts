@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create.dto';
 import { Cart } from './schema/create.schema';
@@ -29,5 +29,11 @@ export class CartController {
     return this.cartService.findByUserId(userId);
   }
 
- 
+  @Delete(':itemId')
+  @UseGuards(JwtAuthGuard)
+  async deleteItem(@Param('itemId') itemId: string, @Request() req) {
+    // Extract userId from JWT token
+    const userId = req.user.sub;
+    return this.cartService.deleteItem(userId, itemId);
+  }
 }
