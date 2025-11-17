@@ -56,7 +56,14 @@ export class Product {
   @Prop({ type: [String], default: [] })
   tags: string[];
 
-  @Prop({ type: [Object], default: [] })
+  @Prop({ 
+    type: [{
+      _id: { type: Types.ObjectId },
+      question: { type: String },
+      answer: { type: String }
+    }], 
+    default: [] 
+  })
   faqs: FAQ[];
 }
 
