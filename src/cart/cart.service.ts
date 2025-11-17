@@ -98,6 +98,7 @@ export class CartService {
       items: cart.items.map((it: any) => {
         const p = it.productId || {};
         return {
+          _id:it._id,
           productId: p._id ?? it.productId, // keep id
           quantity: it.quantity,
           color: it.color,

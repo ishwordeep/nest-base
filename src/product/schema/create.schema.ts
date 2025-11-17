@@ -1,6 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+export interface FAQ {
+  _id?: Types.ObjectId;
+  question: string;
+  answer: string;
+}
+
 export type ProductDocument = Product & Document;
 
 @Schema({ timestamps: true })
@@ -49,6 +55,9 @@ export class Product {
 
   @Prop({ type: [String], default: [] })
   tags: string[];
+
+  @Prop({ type: [Object], default: [] })
+  faqs: FAQ[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
