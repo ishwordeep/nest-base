@@ -7,6 +7,7 @@ import { UserRole } from 'src/user/schema/user.schema';
 import { CreateProductDto } from './dto/create.dto';
 import { UpdateProductDto } from './dto/update.dto';
 import { UpdateProductFlagDto } from './dto/update-flags.dto';
+import { CreateProductFaqDto } from './dto/create-faq.dto';
 
 @Controller('product')
 export class ProductController {
@@ -94,5 +95,14 @@ export class ProductController {
     return this.productService.listByCategoryBasic(categoryId);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Post(':productId/faqs')
+  async updateProductFaqs(
+    @Param('productId') productId: string,
+    @Body() faqDto: CreateProductFaqDto,
+  ) {
+    return this.productService.updateProductFaqs(productId, faqDto);
+  }
 
 }

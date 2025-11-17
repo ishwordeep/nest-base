@@ -6,6 +6,7 @@ import { FilterQuery, Model, Types } from 'mongoose';
 import { generateUniqueSlug } from 'src/common/utils/slug.util';
 import { UpdateProductDto } from './dto/update.dto';
 import { Category, CategoryDocument } from 'src/category/schema/create.schema';
+import { CreateProductFaqDto } from './dto/create-faq.dto';
 
 
 type SortOrderNum = 1 | -1;
@@ -313,7 +314,34 @@ export class ProductService {
   return products;
 }
 
+async updateProductFaqs(productId: string, faqDto: CreateProductFaqDto) {
+  if (!Types.ObjectId.isValid(productId)) {
+    throw new BadRequestException('Invalid product ID');
+  }
 
+  const product = await this.productModel.findById(productId);
+  if (!product) {
+    throw new NotFoundException(`Product with ID ${productId} not found`);
+  }
+
+  // Add unique ID to each FAQ
+  const faqsWithIds = faqDto.faqs.map(faq => ({
+    ...faq,
+    _id: new Types.ObjectId(),
+  }));
+
+  // Replace all FAQs with the new ones
+  const updatedProduct = await this.productModel.findByIdAndUpdate(
+    productId,
+    { $set: { faqs: faqsWithIds } },
+    { new: true, runValidators: true }
+  );
+
+  return {
+    success: true,
+    message: "FAQs updated successfully."
+  };
+}
 
 
 }
