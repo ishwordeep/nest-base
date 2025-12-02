@@ -17,6 +17,7 @@ import { SliderModule } from './slider/slider.module';
 import { FrontendModule } from './frontend/frontend.module';
 import { HomepageSectionModule } from './homepage-section/homepage-section.module';
 import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CartModule } from './cart/cart.module';
     FrontendModule,
     HomepageSectionModule,
     CartModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
