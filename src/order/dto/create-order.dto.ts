@@ -20,9 +20,9 @@ export class CreateOrderDto {
   @IsMongoId()
   userId?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  orderNumber: string;
+  orderNumber?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

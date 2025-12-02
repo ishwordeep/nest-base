@@ -5,11 +5,11 @@ import { Document, Types } from 'mongoose';
 export type OrderDocument = Order & Document;
 
 export enum OrderStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  SHIPPED = 'shipped',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled'
+  PENDING_PAYMENT = 'PENDING_PAYMENT',
+  PAID = 'PAID',
+  SHIPPED = 'SHIPPED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum PaymentMethod {
@@ -104,7 +104,7 @@ export class Order {
   @Prop({
     type: String,
     enum: Object.values(OrderStatus),
-    default: OrderStatus.PENDING,
+    default: OrderStatus.PENDING_PAYMENT ,
   })
   status: OrderStatus;
 
