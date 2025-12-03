@@ -55,11 +55,21 @@ export class CartService {
       await cart.save();
     }
 
-    // 4️⃣ Return success message and the cart object
+    // 4️⃣ Return success message and only the newly added item
+    // Find the item that was just added or updated
+    const addedItemIndex = cart.items.findIndex(
+      (i) =>
+        i.productId.toString() === productId.toString() &&
+        (i.color ?? null) === (color ?? null) &&
+        (i.size ?? null) === (size ?? null),
+    );
+
+    const addedItem = addedItemIndex > -1 ? cart.items[addedItemIndex] : null;
+
     return {
       success: true,
       message: "Item added to cart successfully.",
-      data: cart
+      data: addedItem
     };
   } catch (error: any) {
     if (error?.name === 'ValidationError') {
