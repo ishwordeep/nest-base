@@ -55,10 +55,11 @@ export class CartService {
       await cart.save();
     }
 
-    // 4️⃣ Return success message instead of populated cart
+    // 4️⃣ Return success message and the cart object
     return {
       success: true,
-      message: "Item added to cart successfully."
+      message: "Item added to cart successfully.",
+      data: cart
     };
   } catch (error: any) {
     if (error?.name === 'ValidationError') {
