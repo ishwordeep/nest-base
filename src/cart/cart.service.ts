@@ -66,10 +66,24 @@ export class CartService {
 
     const addedItem = addedItemIndex > -1 ? cart.items[addedItemIndex] : null;
 
+    // Include product details in the response, similar to findByUserId
+    const enhancedItem = addedItem ? {
+      _id: addedItem._id,
+      productId: addedItem.productId,
+      quantity: addedItem.quantity,
+      color: addedItem.color,
+      size: addedItem.size,
+      // Add product fields from the product we already fetched
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      discount: product.discount,
+    } : null;
+
     return {
       success: true,
       message: "Item added to cart successfully.",
-      data: addedItem
+      data: enhancedItem
     };
   } catch (error: any) {
     if (error?.name === 'ValidationError') {
@@ -123,7 +137,11 @@ export class CartService {
       }),
     };
 
-    return shaped  ;
+    return {
+      success: true,
+      message: "Cart retrieved successfully.",
+      data: shaped
+    };
   } catch (error: any) {
     if (error instanceof BadRequestException) throw error;
     throw new BadRequestException(error.message);
