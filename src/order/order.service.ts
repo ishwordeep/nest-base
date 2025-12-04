@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order, OrderDocument, OrderStatus } from './schema/create.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { FilterOrdersDto } from './dto/filter-orders.dto';
 import { generateOrderNumber } from 'src/common/utils/order-number.util';
 
 @Injectable()
@@ -68,5 +69,29 @@ export class OrderService {
     }
 
     return order;
+  }
+
+  /**
+   * Find all orders for a specific user with optional status filtering
+   * @param userId The ID of the user
+   * @param filterDto Optional filter criteria
+   * @returns Array of orders
+   */
+  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<Order[]> {
+    // Start with base query for user's orders
+    const query = this.orderModel.find({ 
+      userId: new Types.ObjectId(userId),
+    });
+
+    // Apply status filter if provided
+    if (filterDto?.status) {
+      query.where('status').equals(filterDto.status);
+    }
+
+    // Sort by most recent first
+    query.sort({ createdAt: -1 });
+
+    // Execute query
+    return query.exec();
   }
 }
