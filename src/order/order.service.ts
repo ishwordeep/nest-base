@@ -50,7 +50,6 @@ export class OrderService {
     const createdOrder = new this.orderModel({
       // spread first so our computed values overwrite whatever came from client
       ...createOrderDto,
-      userId: userId ? new Types.ObjectId(userId) : undefined,
       orderNumber,
       subtotal,
       discountTotal,
@@ -82,6 +81,27 @@ export class OrderService {
     const query = this.orderModel.find({ 
       userId: new Types.ObjectId(userId),
     });
+
+    // Apply status filter if provided
+    if (filterDto?.status) {
+      query.where('status').equals(filterDto.status);
+    }
+
+    // Sort by most recent first
+    query.sort({ createdAt: -1 });
+
+    // Execute query
+    return query.exec();
+  }
+
+  /**
+   * Find all orders with optional filtering (for admin use)
+   * @param filterDto Optional filter criteria
+   * @returns Array of orders
+   */
+  async findAllOrders(filterDto?: FilterOrdersDto): Promise<Order[]> {
+    // Start with base query for all orders
+    const query = this.orderModel.find();
 
     // Apply status filter if provided
     if (filterDto?.status) {
