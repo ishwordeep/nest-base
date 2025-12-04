@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Cart, CartDocument } from './schema/create.schema';
 import { CreateCartDto } from './dto/create.dto';
 import { ProductService } from '../product/product.service';
+import { UpdateCartItemQuantityDto } from './dto/update-quantity.dto';
 
 @Injectable()
 export class CartService {
@@ -184,5 +185,70 @@ export class CartService {
       throw new BadRequestException(error.message);
     }
   }
+
+ 
+async updateItemQuantity(dto: UpdateCartItemQuantityDto) {
+  try {
+    const { userId, itemId, quantity } = dto;
+
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    if (!Types.ObjectId.isValid(itemId)) {
+      throw new BadRequestException('Invalid item ID');
+    }
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new BadRequestException('Quantity must be at least 1');
+    }
+
+    const cart = await this.cartModel.findOne({ userId: new Types.ObjectId(userId) });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+
+    const itemIndex = cart.items.findIndex(
+      (item) => item._id && item._id.toString() === itemId,
+    );
+
+    if (itemIndex === -1) {
+      throw new NotFoundException('Item not found in cart');
+    }
+
+    // Update quantity
+    cart.items[itemIndex].quantity = quantity;
+
+    await cart.save();
+
+    const updatedItem = cart.items[itemIndex];
+    const product = await this.productService.findOne(updatedItem.productId.toString());
+
+    const enhancedItem = {
+      _id: updatedItem._id,
+      productId: updatedItem.productId,
+      quantity: updatedItem.quantity,
+      color: updatedItem.color,
+      size: updatedItem.size,
+      name: product?.name,
+      image: product?.image,
+      price: product?.price,
+      discount: product?.discount,
+    };
+
+    return {
+      success: true,
+      message: 'Cart item quantity updated successfully.',
+      data: enhancedItem,
+    };
+  } catch (error: any) {
+    if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      throw error;
+    }
+    throw new BadRequestException(error.message);
+  }
+}
+
 
 }

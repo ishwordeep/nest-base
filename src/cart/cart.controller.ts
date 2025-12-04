@@ -1,9 +1,10 @@
-import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create.dto';
 import { Cart } from './schema/create.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Types } from 'mongoose';
+import { UpdateCartItemQuantityDto } from './dto/update-quantity.dto';
 
 @Controller('cart')
 export class CartController {
@@ -35,5 +36,23 @@ export class CartController {
     // Extract userId from JWT token
     const userId = req.user.sub;
     return this.cartService.deleteItem(userId, itemId);
+  }
+
+  @Patch(':itemId')
+  @UseGuards(JwtAuthGuard)
+  async updateItemQuantity(
+    @Param('itemId') itemId: string,
+    @Body('quantity') quantity: number,
+    @Request() req
+  ) {
+    const userId = req.user.sub;
+
+    const dto: UpdateCartItemQuantityDto = {
+      userId,
+      itemId,
+      quantity
+    };
+
+    return this.cartService.updateItemQuantity(dto);
   }
 }
