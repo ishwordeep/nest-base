@@ -79,8 +79,9 @@ export class OrderService {
   async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<Order[]> {
     // Start with base query for user's orders
     const query = this.orderModel.find({ 
-      userId: new Types.ObjectId(userId),
+      userId:userId,
     });
+    console.log(query);
 
     // Apply status filter if provided
     if (filterDto?.status) {

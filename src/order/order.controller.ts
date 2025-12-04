@@ -36,7 +36,7 @@ export class OrderController {
   async findUserOrders(@Query() filterDto: FilterOrdersDto, @Request() req) {
     // Extract userId from authenticated request
     const userId = (req as any).user?.sub;
-    console.log(userId);
+    console.log("findUserOrders:",userId);
     return this.orderService.findUserOrders(userId, filterDto);
   }
 
