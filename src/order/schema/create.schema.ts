@@ -77,6 +77,16 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   userId?: Types.ObjectId;
 
+  // customer information
+  @Prop({ trim: true })
+  name?: string;
+
+  @Prop({ trim: true })
+  email?: string;
+
+  @Prop({ trim: true })
+  phone?: string;
+
   // public order code (for showing to customer)
   @Prop({ required: true, unique: true, trim: true })
   orderNumber: string;
