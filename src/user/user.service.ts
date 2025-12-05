@@ -1,11 +1,12 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ShippingAddress, User } from './schema/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateShippingAddressDto } from './dto/create-shipping-address.dto';
+import { UpdateShippingAddressDto } from './dto/update-shipping-address.dto';
 
 @Injectable()
 export class UserService {
@@ -119,7 +120,7 @@ export class UserService {
 
         // If this address is default, unset default on all existing addresses
         if (shouldBeDefault) {
-            user.shippingAddresses.forEach((addr) => {
+            user.shippingAddresses.forEach((addr: ShippingAddress) => {
                 addr.isDefault = false;
             });
         }
@@ -148,4 +149,96 @@ export class UserService {
     }
 }
 
+    async updateShippingAddress(userId: string, addressId: string, dto: UpdateShippingAddressDto) {
+        try {
+            if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(addressId)) {
+                throw new NotFoundException('Invalid user ID or address ID');
+            }
+
+            const user = await this.userModel.findById(userId);
+
+            if (!user) {
+                throw new NotFoundException('User not found');
+            }
+
+            // Find the address to update
+            const addressIndex = user.shippingAddresses.findIndex(
+                (addr) => (addr._id as any).toString() === addressId,
+            );
+
+            if (addressIndex === -1) {
+                throw new NotFoundException('Shipping address not found');
+            }
+
+            // Update the address fields
+            const updatedAddress = {
+                ...user.shippingAddresses[addressIndex].toObject(),
+                ...dto,
+            };
+
+            // Handle default address logic
+            if (dto.isDefault === true) {
+                // If this address is being set as default, unset default on all other addresses
+                user.shippingAddresses.forEach((addr: ShippingAddress, index) => {
+                    if (index !== addressIndex) {
+                        addr.isDefault = false;
+                    }
+                });
+            }
+
+            // Update the address in the array
+            user.shippingAddresses[addressIndex] = updatedAddress as any;
+
+            await user.save();
+
+            return user.shippingAddresses[addressIndex];
+        } catch (error) {
+            console.error("❌ ERROR in updateShippingAddress:", error);
+            console.error("STACK TRACE:", error.stack);
+            throw error;
+        }
+    }
+
+    async deleteShippingAddress(userId: string, addressId: string) {
+        try {
+            if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(addressId)) {
+                throw new NotFoundException('Invalid user ID or address ID');
+            }
+
+            const user = await this.userModel.findById(userId);
+
+            if (!user) {
+                throw new NotFoundException('User not found');
+            }
+
+            // Find the address to delete
+            const addressIndex = user.shippingAddresses.findIndex(
+                (addr: ShippingAddress) => (addr._id as any).toString() === addressId,
+            );
+
+            if (addressIndex === -1) {
+                throw new NotFoundException('Shipping address not found');
+            }
+
+            // Check if the address being deleted is the default
+            const isDefault = user.shippingAddresses[addressIndex].isDefault;
+
+            // Remove the address
+            user.shippingAddresses.splice(addressIndex, 1);
+
+            // If the deleted address was the default and there are other addresses,
+            // set the first remaining address as the default
+            if (isDefault && user.shippingAddresses.length > 0) {
+                user.shippingAddresses[0].isDefault = true;
+            }
+
+            await user.save();
+
+            return { success: true, message: 'Shipping address deleted successfully' };
+        } catch (error) {
+            console.error("❌ ERROR in deleteShippingAddress:", error);
+            console.error("STACK TRACE:", error.stack);
+            throw error;
+        }
+    }
 }
