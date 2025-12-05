@@ -38,7 +38,7 @@ export class ContactService {
       filter.$text = { $search: query.search };
     }
 
-    const [items, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       this.contactModel
         .find(filter)
         .sort({ createdAt: -1 })
@@ -50,11 +50,18 @@ export class ContactService {
     ]);
 
     return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      // items,
+      // total,
+      // page,
+      // limit,
+      // totalPages: Math.ceil(total / limit),
+        data,
+            pagination: {
+                total,
+                page: Math.max(1, page),
+                limit: Math.max(1, limit),
+                pages: Math.ceil(total / Math.max(1, limit)) || 1,
+            }
     };
   }
 
