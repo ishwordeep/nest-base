@@ -19,6 +19,7 @@ import { HomepageSectionModule } from './homepage-section/homepage-section.modul
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { StripeModule } from './stripe/stripe.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { StripeModule } from './stripe/stripe.module';
     HomepageSectionModule,
     CartModule,
     OrderModule,
-    StripeModule.forRootAsync()
+    StripeModule.forRootAsync(),
+    ContactModule
     // StripeModule,
   ],
   controllers: [AppController],
