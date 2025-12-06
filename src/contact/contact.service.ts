@@ -80,15 +80,13 @@ export class ContactService {
     dto: UpdateContactAdminDto,
   ) {
     const doc = await this.contactModel
-      .findByIdAndUpdate(id, dto, { new: true })
+      .findByIdAndUpdate(id, dto, {  new: true, lean: true})
       .exec();
 
     if (!doc) {
       throw new NotFoundException('Contact message not found');
     }
-    return {
-      data: doc
-    };
+    return doc;
   }
 
   async removeAdmin(id: string): Promise<void> {
