@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
- 
+
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactAdminDto } from './dto/update-contact-admin.dto';
 import { QueryContactDto } from './dto/query-contact.dto';
@@ -65,18 +65,20 @@ export class ContactService {
     };
   }
 
-  async findOneAdmin(id: string): Promise<ContactMessage> {
+  async findOneAdmin(id: string) {
     const doc = await this.contactModel.findById(id).exec();
     if (!doc) {
       throw new NotFoundException('Contact message not found');
     }
-    return doc;
+    return {
+      data: doc
+    };
   }
 
   async updateAdmin(
     id: string,
     dto: UpdateContactAdminDto,
-  ): Promise<ContactMessage> {
+  ) {
     const doc = await this.contactModel
       .findByIdAndUpdate(id, dto, { new: true })
       .exec();
@@ -84,7 +86,9 @@ export class ContactService {
     if (!doc) {
       throw new NotFoundException('Contact message not found');
     }
-    return doc;
+    return {
+      data: doc
+    };
   }
 
   async removeAdmin(id: string): Promise<void> {
