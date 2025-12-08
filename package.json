@@ -20,11 +20,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed:admin": "ts-node -r tsconfig-paths/register src/seeds/admin.seed.ts",
     "seed:setting": "ts-node -r tsconfig-paths/register src/seeds/setting.seed.ts",
+    "seed:about": "ts-node -r tsconfig-paths/register src/seeds/about.seed.ts",
     "seed:homesection": "ts-node -r tsconfig-paths/register src/seeds/homepage-section.seed.ts",
     "seed:category": "ts-node -r tsconfig-paths/register src/seeds/category.seed.ts",
     "seed:product": "ts-node -r tsconfig-paths/register src/seeds/product.seed.ts",
     "seed:slider": "ts-node -r tsconfig-paths/register src/seeds/slider.seed.ts",
-    "seed:all": "npm run seed:category && npm run seed:product && npm run seed:slider",
+    "seed:all": "npm run seed:admin && npm run seed:setting && npm run seed:about && npm run seed:category && npm run seed:product && npm run seed:slider && npm run seed:homesection",
     "deploy": "npm install && npm run build && (pm2 reload backend-api || pm2 start dist/main.js --name backend-api)",
     "deploy:fast": "npm run build && (pm2 reload backend-api || pm2 start dist/main.js --name backend-api)"
   },

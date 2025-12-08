@@ -4,114 +4,113 @@ import { Document } from 'mongoose';
 
 export type AboutDocument = About & Document;
 
-/* ---------- Subdocuments ---------- */
+/* ---------------------- Sub Schemas ---------------------- */
 
 @Schema({ _id: false })
 export class Stat {
-  @Prop({ required: true, trim: true })
-  number: string;          // e.g. "10+", "50K+"
+  @Prop({ required: true })
+  number: string; // e.g. "10+", "50K+"
 
-  @Prop({ required: true, trim: true })
-  label: string;           // e.g. "Years Experience"
+  @Prop({ required: true })
+  label: string;  // e.g. "Years Experience"
 }
 export const StatSchema = SchemaFactory.createForClass(Stat);
 
+
 @Schema({ _id: false })
 export class HeroSection {
-  @Prop({ required: true, trim: true })
-  mainTitle: string;       // "About Fashion Store"
+  @Prop({ required: true })
+  mainTitle: string;
 
-  @Prop({ trim: true })
+  @Prop()
   subtitle?: string;
 
-  @Prop({ trim: true })
-  buttonText?: string;     // "Our Story"
-
-  @Prop({ trim: true })
-  buttonLink?: string;     // "/about"
+  @Prop()
+  buttonText?: string;
 
   @Prop({ type: [StatSchema], default: [] })
   stats: Stat[];
 }
 export const HeroSectionSchema = SchemaFactory.createForClass(HeroSection);
 
+
+
+//mission vison
 @Schema({ _id: false })
 export class Statement {
-  @Prop({ required: true, trim: true })
-  icon: string;            // e.g. "i-lucide-target"
+  @Prop({ required: true })
+  icon: string; // e.g. "i-lucide-target"
 
-  @Prop({ trim: true })
-  iconBackgroundColor?: string; // "Blue", "Purple"
+  @Prop()
+  iconBackgroundColor?: string;
 
-  @Prop({ required: true, trim: true })
-  title: string;           // "Our Mission", "Our Vision"
+  @Prop({ required: true })
+  title: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true })
   description: string;
 }
 export const StatementSchema = SchemaFactory.createForClass(Statement);
 
+
 @Schema({ _id: false })
 export class ProductStoryItem {
   @Prop({ required: true })
-  year: number;            // 2025
+  year: number;
 
-  @Prop({ required: true, trim: true })
-  milestoneTitle: string;  // "Launched First Product"
+  @Prop({ required: true })
+  milestoneTitle: string;
 
-  @Prop({ trim: true })
-  description?: string;    // Story behind the milestone
+  @Prop()
+  description?: string;
 }
-export const ProductStoryItemSchema =
-  SchemaFactory.createForClass(ProductStoryItem);
+export const ProductStoryItemSchema = SchemaFactory.createForClass(ProductStoryItem);
+
 
 @Schema({ _id: false })
 export class TeamMember {
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true, trim: true })
-  titleRole: string;       // "Founder & CEO"
+  @Prop({ required: true })
+  titleRole: string;
 
-  @Prop({ trim: true })
+  @Prop()
   shortBio?: string;
 
-  @Prop({ trim: true })
-  imageUrl?: string;       // store uploaded image URL
+  @Prop()
+  imageUrl?: string;
 }
 export const TeamMemberSchema = SchemaFactory.createForClass(TeamMember);
 
+
 @Schema({ _id: false })
 export class CoreValue {
-  @Prop({ required: true, trim: true })
-  icon: string;            // "i-heroicons-heart"
+  @Prop({ required: true })
+  icon: string;
 
-  @Prop({ trim: true })
-  colorGradient?: string;  // "Pink"
+  @Prop()
+  color?: string;
 
-  @Prop({ required: true, trim: true })
-  title: string;           // "Customer First"
+  @Prop({ required: true })
+  title: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true })
   description: string;
 }
 export const CoreValueSchema = SchemaFactory.createForClass(CoreValue);
 
-/* ---------- Root About Page Schema ---------- */
+
+/* ---------------------- MAIN ABOUT PAGE ---------------------- */
 
 @Schema({
-  collection: 'about_pages',
+  collection: 'about_page',
   timestamps: true,
 })
 export class About {
-  // If you ever want multiple About pages (e.g. per brand) add a slug here
-  @Prop({ trim: true, default: 'default', index: true, unique: true })
-  slug: string;
-
   @Prop({ type: HeroSectionSchema, required: true })
   hero: HeroSection;
 
-  // Statement 1 & 2 – stored generically as an array
   @Prop({ type: [StatementSchema], default: [] })
   statements: Statement[];
 

@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Setting, SettingDocument } from './schema/create.schema';
+import { About, AboutDocument } from './schema/about.schema';
 import { CreateSettingDto } from './dto/create.dto';
+import { CreateAboutDto, UpdateAboutDto } from './dto/about.dto';
 import { Model } from 'mongoose';
 import { UpdateSettingDto } from './dto/update.dto';
 
 @Injectable()
 export class SettingService {
-    constructor(@InjectModel(Setting.name) private settingModel: Model<SettingDocument>) { }
+    constructor(
+        @InjectModel(Setting.name) private settingModel: Model<SettingDocument>,
+        @InjectModel(About.name) private aboutModel: Model<AboutDocument>
+    ) { }
 
     async create(createSettingDto: CreateSettingDto): Promise<any> {
         const SettingData = { ...createSettingDto };
@@ -30,5 +35,18 @@ export class SettingService {
         return updated as unknown as Setting;
     }
 
+    // About page methods
+    async getAbout() {
+        const about = await this.aboutModel.findOne();
+        return about;
+    }
+    async updateAbout(updateData: UpdateAboutDto) {
+        const updated = await this.aboutModel.findOneAndUpdate(
+            {},
+            { $set: updateData },
+            { new: true, upsert: true } // ensures document exists
+        );
 
+        return updated;
+    }
 }
