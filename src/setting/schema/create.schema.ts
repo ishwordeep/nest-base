@@ -51,12 +51,6 @@ export class Setting {
     description?: string;
 
     @Prop({ trim: true })
-    termsOfServices?: string;
-
-    @Prop({ trim: true })
-    cookiesPolicies?: string;
-
-    @Prop({ trim: true })
     returnAndExchanges?: string;
 
     @Prop({ trim: true })

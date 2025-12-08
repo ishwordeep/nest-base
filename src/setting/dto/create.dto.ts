@@ -57,15 +57,6 @@ export class CreateSettingDto {
     @MaxLength(500)
     description?: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(1000)
-    termsOfServices?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(1000)
-    cookiesPolicies?: string;
 
     @IsOptional()
     @IsString()
