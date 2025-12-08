@@ -2,9 +2,10 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { WebhookController } from './webhook/webhook.controller';
 
 @Module({
-  controllers: [StripeController],
+  controllers: [StripeController, WebhookController],
   providers: [StripeService]
 })
 export class StripeModule {
