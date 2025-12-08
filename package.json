@@ -24,7 +24,9 @@
     "seed:category": "ts-node -r tsconfig-paths/register src/seeds/category.seed.ts",
     "seed:product": "ts-node -r tsconfig-paths/register src/seeds/product.seed.ts",
     "seed:slider": "ts-node -r tsconfig-paths/register src/seeds/slider.seed.ts",
-    "seed:all": "npm run seed:category && npm run seed:product && npm run seed:slider"
+    "seed:all": "npm run seed:category && npm run seed:product && npm run seed:slider",
+    "deploy": "npm install && npm run build && (pm2 reload backend-api || pm2 start dist/main.js --name backend-api)",
+  "deploy:fast": "npm run build && (pm2 reload backend-api || pm2 start dist/main.js --name backend-api)"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

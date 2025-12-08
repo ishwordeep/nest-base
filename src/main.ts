@@ -30,7 +30,18 @@ async function bootstrap() {
       },
     }),
   );
-    app.enableCors();
+    // app.enableCors();
+      app.enableCors({
+    origin: [
+      'https://admin.parishjatleo.com',
+      'https://parishjatleo.com',
+      'http://localhost:6001', 
+      'http://localhost:6002',
+    ],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    credentials: true, 
+  });
+
 
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new AllExceptionsFilter());
