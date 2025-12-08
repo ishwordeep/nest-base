@@ -5,11 +5,13 @@ import { Order, OrderDocument, OrderStatus } from './schema/create.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
 import { generateOrderNumber } from 'src/common/utils/order-number.util';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>,
+    private readonly cartService: CartService,
   ) { }
 
   private async generateUniqueOrderNumber(): Promise<string> {
@@ -58,7 +60,17 @@ export class OrderService {
       status: OrderStatus.PENDING_PAYMENT, // always start as pending for payment
     });
 
-    return createdOrder.save();
+    // Save the order
+    const savedOrder = await createdOrder.save();
+
+
+    // Only empty the cart if userId is provided
+    console.log(createOrderDto.userId);
+    if (createOrderDto.userId) {
+      await this.cartService.emptyCart(createOrderDto.userId);
+    }
+
+    return savedOrder;
   }
   async findOne(id: string): Promise<Order> {
     const order = await this.orderModel.findById(id).exec();
@@ -81,7 +93,7 @@ export class OrderService {
     const query = this.orderModel.find({ 
       userId:userId,
     });
-    console.log(query);
+    // console.log(query);
 
     // Apply status filter if provided
     if (filterDto?.status) {

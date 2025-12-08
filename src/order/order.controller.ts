@@ -23,8 +23,8 @@ export class OrderController {
     const userId = (req as any).user?.sub;
     // Add userId to the order data
     createOrderDto.userId = userId;
-    console.log(createOrderDto,userId);
-    return this.orderService.create(createOrderDto);
+    // console.log(createOrderDto,userId);
+    return this.orderService.create(createOrderDto,userId);
   }
 
   /**

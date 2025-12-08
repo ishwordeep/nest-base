@@ -186,7 +186,7 @@ export class CartService {
     }
   }
 
- 
+
 async updateItemQuantity(dto: UpdateCartItemQuantityDto) {
   try {
     const { userId, itemId, quantity } = dto;
@@ -250,5 +250,38 @@ async updateItemQuantity(dto: UpdateCartItemQuantityDto) {
   }
 }
 
+
+  async emptyCart(userId: string) {
+    try {
+      if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+      }
+
+      const cart = await this.cartModel.findOne({ userId: new Types.ObjectId(userId) });
+
+      if (!cart) {
+        return {
+          success: true,
+          message: 'Cart is already empty'
+        };
+      }
+
+      // Empty the cart items
+      cart.items = [];
+
+      // Save the updated cart
+      await cart.save();
+
+      return {
+        success: true,
+        message: 'Cart emptied successfully'
+      };
+    } catch (error: any) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
 
 }

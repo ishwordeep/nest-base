@@ -9,7 +9,7 @@ export enum UserRole {
 }
 
 @Schema()
-export class ShippingAddress {
+export class ShippingAddress extends Document {
     @Prop({ required: false })
     street: string;
 
