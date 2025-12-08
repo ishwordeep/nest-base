@@ -60,16 +60,13 @@ export class CreateSettingDto {
 
     @IsOptional()
     @IsString()
-    @MaxLength(1000)
     returnAndExchanges?: string;
 
     @IsOptional()
     @IsString()
-    @MaxLength(1000)
     sizeGuides?: string;
 
     @IsOptional()
     @IsString()
-    @MaxLength(1000)
     shippingInformations?: string;
 }
