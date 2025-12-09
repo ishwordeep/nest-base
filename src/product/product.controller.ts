@@ -20,6 +20,8 @@ export class ProductController {
     return this.productService.create(createProductDto)
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -81,7 +83,8 @@ export class ProductController {
     return this.productService.getProductsByFlag(flag);
   }
 
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Patch('update/:flag')
   updateFlag(
     @Param('flag') flag: 'new' | 'trending' | 'featured',
