@@ -49,22 +49,22 @@ async function bootstrap() {
     ],
     productStory: [
       {
-        year: 2010,
+        year: '2010',
         milestoneTitle: "Founded in Los Angeles",
         description: "UrbanThreads was established with a focus on urban streetwear."
       },
       {
-        year: 2015,
+        year: '2015',
         milestoneTitle: "Sustainable Initiative Launch",
         description: "Introduced our first fully sustainable clothing line."
       },
       {
-        year: 2020,
+        year: '2020',
         milestoneTitle: "Global Expansion",
         description: "Opened flagship stores in major fashion capitals worldwide."
       },
       {
-        year: 2023,
+        year: '2023',
         milestoneTitle: "Digital Transformation",
         description: "Launched our innovative e-commerce platform and virtual try-on technology."
       }
