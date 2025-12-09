@@ -60,7 +60,7 @@ export class StatementDto {
 }
 
 export class ProductStoryItemDto {
-  @IsNumber()
+  @IsString()
   year: string;
 
   @IsString()
