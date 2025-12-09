@@ -56,7 +56,7 @@ export const StatementSchema = SchemaFactory.createForClass(Statement);
 @Schema({ _id: false })
 export class ProductStoryItem {
   @Prop({ required: true })
-  year: number;
+  year: string;
 
   @Prop({ required: true })
   milestoneTitle: string;

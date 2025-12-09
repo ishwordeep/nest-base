@@ -61,7 +61,7 @@ export class StatementDto {
 
 export class ProductStoryItemDto {
   @IsNumber()
-  year: number;
+  year: string;
 
   @IsString()
   @IsNotEmpty()
