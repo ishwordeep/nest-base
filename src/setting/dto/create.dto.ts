@@ -51,4 +51,22 @@ export class CreateSettingDto {
     @IsOptional()
     @IsUrl({}, { message: 'Invalid TikTok URL' })
     tiktok?: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    description?: string;
+
+
+    @IsOptional()
+    @IsString()
+    returnAndExchanges?: string;
+
+    @IsOptional()
+    @IsString()
+    sizeGuides?: string;
+
+    @IsOptional()
+    @IsString()
+    shippingInformations?: string;
 }

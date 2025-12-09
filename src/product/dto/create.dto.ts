@@ -14,6 +14,10 @@ export class CreateProductDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsOptional()
+  story: string;
+
 
   @IsMongoId()
   @IsNotEmpty()

@@ -47,6 +47,18 @@ export class Setting {
     @Prop({ trim: true })
     tiktok?: string;
 
+    @Prop({ trim: true })
+    description?: string;
+
+    @Prop({ trim: true })
+    returnAndExchanges?: string;
+
+    @Prop({ trim: true })
+    sizeGuides?: string;
+
+    @Prop({ trim: true })
+    shippingInformations?: string;
+
 }
 
 export const SettingSchema = SchemaFactory.createForClass(Setting);

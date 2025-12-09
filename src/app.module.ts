@@ -20,12 +20,13 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ContactModule } from './contact/contact.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     // MongooseModule.forRoot(process.env.DATABASE_URL as string),
-   
+
     DatabaseModule,
     AuthModule,
     JwtModule,
@@ -41,7 +42,8 @@ import { ContactModule } from './contact/contact.module';
     CartModule,
     OrderModule,
     StripeModule.forRootAsync(),
-    ContactModule
+    ContactModule,
+    AdminModule
     // StripeModule,
   ],
   controllers: [AppController],
