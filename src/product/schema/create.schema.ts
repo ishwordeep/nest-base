@@ -26,6 +26,9 @@ export class Product {
   @Prop({ trim: true })
   image: string;
 
+  @Prop({ trim: true })
+  story: string;
+
   @Prop({ type: [String], default: [] })
   images: string[];
 
@@ -56,13 +59,13 @@ export class Product {
   @Prop({ type: [String], default: [] })
   tags: string[];
 
-  @Prop({ 
+  @Prop({
     type: [{
       _id: { type: Types.ObjectId },
       question: { type: String },
       answer: { type: String }
-    }], 
-    default: [] 
+    }],
+    default: []
   })
   faqs: FAQ[];
 }
