@@ -6,12 +6,14 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
 import { generateOrderNumber } from 'src/common/utils/order-number.util';
 import { CartService } from 'src/cart/cart.service';
+import { PaymentStatus } from './schema/create.schema';
+
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>,
-    private readonly cartService: CartService,
+    private readonly cartService: CartService
   ) { }
 
   private async generateUniqueOrderNumber(): Promise<string> {
@@ -32,7 +34,7 @@ export class OrderService {
     );
   }
 
-   async create(createOrderDto: CreateOrderDto, userId?: string) {
+  async create(createOrderDto: CreateOrderDto, userId?: string) {
     // 1) generate unique, human-readable order number
     const orderNumber = await this.generateUniqueOrderNumber();
 
@@ -90,8 +92,8 @@ export class OrderService {
    */
   async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<Order[]> {
     // Start with base query for user's orders
-    const query = this.orderModel.find({ 
-      userId:userId,
+    const query = this.orderModel.find({
+      userId: userId,
     });
     // console.log(query);
 
@@ -126,5 +128,24 @@ export class OrderService {
 
     // Execute query
     return query.exec();
+  }
+
+  async markOrderAsPaid(orderId: string, paymentIntentId: string) {
+    const order = await this.orderModel.findById(orderId);
+    if (!order) return;
+
+    order.status = OrderStatus.PAID;
+    order.paymentStatus = PaymentStatus.PAID;
+    order.transactionId = paymentIntentId;
+
+    await order.save();
+  }
+
+  async markOrderAsFailed(orderId: string) {
+    const order = await this.orderModel.findById(orderId);
+    if (!order) return;
+
+    order.status = OrderStatus.CANCELLED;
+    await order.save();
   }
 }

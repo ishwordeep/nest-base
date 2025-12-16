@@ -11,7 +11,7 @@ export class StripeService {
     private readonly apiKey: string,
   ) {
     this.stripe = new Stripe(this.apiKey, {
-      //   ApiVersion:null, // Use latest API version, or "null" for your default
+      apiVersion: '2025-11-17.clover', // Use latest API version, or "null" for your default
     });
   }
 
@@ -57,6 +57,27 @@ export class StripeService {
       this.logger.error('Failed to create PaymentIntent', error.stack);
       throw error;
     }
+  }
+
+  async createPaymentIntentForOrder(order: any) {
+    const paymentIntent = await this.stripe.paymentIntents.create({
+      amount: Math.round(order.grandTotal * 100), // cents
+      currency: 'usd',
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+        userId: order.userId?.toString() ?? 'guest',
+      },
+    });
+
+    this.logger.log(
+      `PaymentIntent created: ${paymentIntent.id} for order ${order.orderNumber}`,
+    );
+
+    return paymentIntent;
   }
 
   // Subscriptions (Create Subscription)
@@ -158,47 +179,6 @@ export class StripeService {
     }
   }
 
-  async handleWebhook(req: any, res: any, signature: string) {
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      throw new Error('Webhook secret key not found');
-    }
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
-
-    let event;
-
-    try {
-      event = this.stripe.webhooks.constructEvent(
-        req.rawBody,
-        signature,
-        endpointSecret,
-      );
-    } catch (err) {
-      this.logger.error(`Webhook signature verification failed: ${err.message}`);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event types
-    switch (event.type) {
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
-        this.logger.log(`💰 Payment succeeded: ${paymentIntent.id}`);
-        // TODO: update DB order here
-        break;
-
-      case 'payment_intent.payment_failed':
-        const failedIntent = event.data.object;
-        this.logger.warn(`❌ Payment failed: ${failedIntent.id}`);
-        break;
-
-      default:
-        this.logger.warn(`Unhandled event type: ${event.type}`);
-    }
-
-    // Always return 200 to Stripe
-    res.json({ received: true });
-  }
-
-
   // Payment Links
   async createPaymentLink(priceId: string): Promise<Stripe.PaymentLink> {
     try {
@@ -212,4 +192,20 @@ export class StripeService {
       throw error;
     }
   }
+
+  // stripe.service.ts
+  async verifyWebhook(req: any, signature: string): Promise<Stripe.Event> {
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      throw new Error('STRIPE_WEBHOOK_SECRET is not configured');
+    }
+
+    this.logger.log('✅ Stripe webhook hit');
+
+    return this.stripe.webhooks.constructEvent(
+      req.rawBody,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
+  }
 }
+

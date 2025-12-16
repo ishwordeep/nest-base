@@ -1,17 +1,52 @@
-import { Controller, Post, Req, Res, Headers } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import { BadRequestException, Controller, Headers, Post, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { StripeService } from '../stripe.service';
+import { OrderService } from 'src/order/order.service';
 
 @Controller('stripe')
 export class WebhookController {
-    constructor(private readonly stripeService: StripeService) { }
+    constructor(
+        private readonly stripeService: StripeService,
+        private readonly orderService: OrderService,
+    ) { }
 
     @Post('webhook')
     async handleStripeWebhook(
         @Req() req: Request,
-        @Res() res: Response,
         @Headers('stripe-signature') signature: string,
     ) {
-        return this.stripeService.handleWebhook(req, res, signature);
+        let event;
+
+        try {
+            event = this.stripeService.verifyWebhook(req, signature);
+        } catch (err: any) {
+            throw new BadRequestException(`Webhook Error: ${err.message}`);
+        }
+
+        switch (event.type) {
+            case 'payment_intent.succeeded': {
+                const paymentIntent = event.data.object as any;
+                const orderId = paymentIntent.metadata?.orderId;
+
+                if (!orderId) break;
+
+                await this.orderService.markOrderAsPaid(orderId, paymentIntent.id);
+                break;
+            }
+
+
+            case 'payment_intent.payment_failed': {
+                const paymentIntent = event.data.object as any;
+                const orderId = paymentIntent.metadata?.orderId;
+
+                if (!orderId) break;
+
+                await this.orderService.markOrderAsFailed(orderId);
+                break;
+            }
+
+        }
+
+        return { received: true };
     }
 }

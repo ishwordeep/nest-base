@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
@@ -6,10 +6,14 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/user/schema/user.schema';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(
+    private readonly orderService: OrderService,
+    private readonly stripeService: StripeService,
+  ) { }
 
   /**
    * Create a new order
@@ -24,7 +28,7 @@ export class OrderController {
     // Add userId to the order data
     createOrderDto.userId = userId;
     // console.log(createOrderDto,userId);
-    return this.orderService.create(createOrderDto,userId);
+    return this.orderService.create(createOrderDto, userId);
   }
 
   /**
@@ -36,7 +40,7 @@ export class OrderController {
   async findUserOrders(@Query() filterDto: FilterOrdersDto, @Request() req) {
     // Extract userId from authenticated request
     const userId = (req as any).user?.sub;
-    console.log("findUserOrders:",userId);
+    console.log("findUserOrders:", userId);
     return this.orderService.findUserOrders(userId, filterDto);
   }
 
@@ -59,5 +63,24 @@ export class OrderController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/payment-intent')
+  async createPaymentIntentForOrder(@Param('id') orderId: string, @Request() req) {
+    const order = await this.orderService.findOne(orderId);
+
+    const userId = (req as any).user?.sub;
+    if (order.userId?.toString() !== userId) throw new ForbiddenException();
+
+    const paymentIntent = await this.stripeService.createPaymentIntentForOrder(order);
+
+    return {
+      orderId,
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: paymentIntent.amount,
+      currency: paymentIntent.currency,
+    };
   }
 }

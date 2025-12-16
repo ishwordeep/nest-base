@@ -21,6 +21,7 @@ import { OrderModule } from './order/order.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ContactModule } from './contact/contact.module';
 import { AdminModule } from './admin/admin.module';
+import { WebhookModule } from './stripe/webhook/webhook.module';
 
 @Module({
   imports: [
@@ -43,8 +44,8 @@ import { AdminModule } from './admin/admin.module';
     OrderModule,
     StripeModule.forRootAsync(),
     ContactModule,
-    AdminModule
-    // StripeModule,
+    AdminModule,
+    WebhookModule
   ],
   controllers: [AppController],
   providers: [AppService],
