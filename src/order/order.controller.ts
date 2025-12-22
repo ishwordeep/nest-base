@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
@@ -7,6 +7,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/user/schema/user.schema';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { StripeService } from 'src/stripe/stripe.service';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Controller('order')
 export class OrderController {
@@ -82,5 +83,19 @@ export class OrderController {
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
     };
+  }
+
+  /**
+   * Update the status of an order (admin only)
+   * PATCH /order/:id/status
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch(':id/status')
+  async updateOrderStatus(
+    @Param('id') id: string,
+    @Body() updateOrderStatusDto: UpdateOrderStatusDto
+  ) {
+    return this.orderService.updateOrderStatus(id, updateOrderStatusDto);
   }
 }

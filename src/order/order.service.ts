@@ -7,6 +7,7 @@ import { FilterOrdersDto } from './dto/filter-orders.dto';
 import { generateOrderNumber } from 'src/common/utils/order-number.util';
 import { CartService } from 'src/cart/cart.service';
 import { PaymentStatus } from './schema/create.schema';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 
 @Injectable()
@@ -147,5 +148,29 @@ export class OrderService {
 
     order.status = OrderStatus.CANCELLED;
     await order.save();
+  }
+
+  /**
+   * Update the status of an order
+   * @param id The ID of the order to update
+   * @param updateOrderStatusDto The DTO containing the new status
+   * @returns The updated order
+   */
+  async updateOrderStatus(id: string, updateOrderStatusDto: UpdateOrderStatusDto): Promise<Order> {
+    const order = await this.orderModel.findById(id);
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    order.status = updateOrderStatusDto.status;
+
+    // If status is PAID, also update payment status
+    if (updateOrderStatusDto.status === OrderStatus.PAID) {
+      order.paymentStatus = PaymentStatus.PAID;
+    }
+
+    const updatedOrder = await order.save();
+    return updatedOrder;
   }
 }
