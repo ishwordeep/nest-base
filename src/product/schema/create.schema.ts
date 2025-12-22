@@ -59,6 +59,9 @@ export class Product {
   @Prop({ type: [String], default: [] })
   tags: string[];
 
+  @Prop({ type: [String], default: [] })
+  target_audience: string[];
+
   @Prop({
     type: [{
       _id: { type: Types.ObjectId },

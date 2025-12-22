@@ -22,6 +22,7 @@ export interface FindAllProductsQuery {
   tags?: string[];
   colors?: string[];
   sizes?: string[];
+  target_audience?: string[];
   isFeatured?: boolean;
   isNew?: boolean;
   isTrending?: boolean;
@@ -128,6 +129,7 @@ export class ProductService {
       tags,
       colors,
       sizes,
+      target_audience,
       isFeatured,
       isNew,
       isTrending,
@@ -151,6 +153,7 @@ export class ProductService {
         { slug: regex },
         { description: regex },
         { tags: regex },
+        { target_audience: regex },
       ];
     }
 
@@ -187,6 +190,7 @@ export class ProductService {
     if (tags?.length) filter.tags = { $in: tags };
     if (colors?.length) filter.colors = { $in: colors };
     if (sizes?.length) filter.sizes = { $in: sizes };
+    if (target_audience?.length) filter.target_audience = { $in: target_audience };
 
     // sorting
     const sort: Record<string, SortOrderNum> = {};
