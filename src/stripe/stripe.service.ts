@@ -65,6 +65,7 @@ export class StripeService {
       currency: 'usd',
       automatic_payment_methods: {
         enabled: true,
+        allow_redirects: 'never'
       },
       metadata: {
         orderId: order._id.toString(),
@@ -202,7 +203,7 @@ export class StripeService {
     this.logger.log('✅ Stripe webhook hit');
 
     return this.stripe.webhooks.constructEvent(
-      req.rawBody,
+      req.body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET,
     );

@@ -17,7 +17,7 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  app.use('/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
+  app.use('/api/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
 
   app.useGlobalPipes(
     new ValidationPipe({
