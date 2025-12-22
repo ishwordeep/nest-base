@@ -53,6 +53,7 @@ export class ProductController {
     @Query('tags') tags?: string,   // comma-separated
     @Query('colors') colors?: string, // comma-separated
     @Query('sizes') sizes?: string,  // comma-separated
+    @Query('target_audience') target_audience?: string,  // comma-separated
     @Query('isFeatured') isFeatured?: string,
     @Query('isNew') isNew?: string,
     @Query('isTrending') isTrending?: string,
@@ -69,6 +70,7 @@ export class ProductController {
       tags: tags?.split(',').map(s => s.trim()).filter(Boolean),
       colors: colors?.split(',').map(s => s.trim()).filter(Boolean),
       sizes: sizes?.split(',').map(s => s.trim()).filter(Boolean),
+      target_audience: target_audience?.split(',').map(s => s.trim()).filter(Boolean),
       isActive: typeof isActive === 'string' ? isActive === 'true' : undefined,
       isFeatured: typeof isFeatured === 'string' ? isFeatured === 'true' : undefined,
       isNew: typeof isNew === 'string' ? isNew === 'true' : undefined,
