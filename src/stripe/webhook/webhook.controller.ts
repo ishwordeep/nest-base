@@ -18,7 +18,7 @@ export class WebhookController {
         let event;
 
         try {
-            event = this.stripeService.verifyWebhook(req, signature);
+            event = await this.stripeService.verifyWebhook(req, signature);
         } catch (err: any) {
             throw new BadRequestException(`Webhook Error: ${err.message}`);
         }
