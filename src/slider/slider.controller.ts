@@ -6,6 +6,8 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/user/schema/user.schema';
+import { PaginatedResponseDto, PaginationQueryDto } from './dto/pagination.dto';
+import { Slider } from './schema/create.schema';
 
 @Controller('slider')
 export class SliderController {
@@ -19,9 +21,21 @@ export class SliderController {
   }
 
   @Get()
-  async findAll(@Query('activeOnly') activeOnly?: string) {
+  async findAll(
+    @Query('activeOnly') activeOnly?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('sortBy') sortBy?: 'displayOrder' | 'createdAt',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ): Promise<PaginatedResponseDto<Slider>> {
     const isActiveOnly = activeOnly === 'true';
-    return this.sliderService.findAll(isActiveOnly);
+    return this.sliderService.findAll(
+      isActiveOnly,
+      Number(page) || 1,
+      Number(limit) || 10,
+      sortBy || 'displayOrder',
+      sortOrder || 'asc'
+    );
   }
 
   @Get(':id')
@@ -43,6 +57,6 @@ export class SliderController {
     return this.sliderService.remove(id);
   }
 
-   
+
 
 }

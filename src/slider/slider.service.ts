@@ -26,9 +26,38 @@ export class SliderService {
   }
 
 
-  async findAll(activeOnly: boolean = false): Promise<Slider[]> {
+  async findAll(activeOnly: boolean = false, page: number = 1, limit: number = 10, sortBy: string = 'displayOrder', sortOrder: string = 'asc'): Promise<{ data: Slider[], pagination: { total: number, page: number, limit: number, pages: number } }> {
     const query = activeOnly ? { isActive: true } : {};
-    return this.sliderModel.find(query).sort({ displayOrder: 1 }).exec();
+
+    // Ensure valid pagination parameters
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    // Set up sorting
+    const sort: Record<string, 1 | -1> = {};
+    sort[sortBy === 'createdAt' ? 'createdAt' : 'displayOrder'] = sortOrder === 'desc' ? -1 : 1;
+
+    // Execute query with pagination
+    const [data, total] = await Promise.all([
+      this.sliderModel
+        .find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(safeLimit)
+        .exec(),
+      this.sliderModel.countDocuments(query),
+    ]);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page: safePage,
+        limit: safeLimit,
+        pages: Math.ceil(total / safeLimit) || 1,
+      }
+    };
   }
 
   async findOne(id: string): Promise<Slider> {
