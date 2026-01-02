@@ -122,8 +122,9 @@ export class Order {
   @Prop({
     type: String,
     enum: Object.values(PaymentMethod),
+    required: false,
   })
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod;
 
   @Prop({
     type: String,

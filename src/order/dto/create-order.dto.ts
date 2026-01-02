@@ -69,7 +69,7 @@ export class CreateOrderDto {
 
   @IsOptional()
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod;
 
   @IsOptional()
   @IsString()
