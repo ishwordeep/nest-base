@@ -83,13 +83,14 @@ export class ResponseInterceptor implements NestInterceptor {
           'pagination' in payload &&
           typeof payload.pagination === 'object'
         ) {
-          const { data, pagination, ...rest } = payload;
+          const { data, pagination, statusCounts, ...rest } = payload;
 
-          // Return with pagination object
+          // Return with pagination object and statusCounts if present
           return {
             success: true,
             data,
             pagination,
+            ...(statusCounts && { statusCounts }),
             message,
           };
         }
