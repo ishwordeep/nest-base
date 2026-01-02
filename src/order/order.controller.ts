@@ -35,8 +35,8 @@ export class OrderController {
   }
 
   /**
-   * Get all orders for the authenticated user with optional status filtering
-   * GET /order/user/me?status=PAID
+   * Get all orders for the authenticated user with optional status filtering and pagination
+   * GET /order/user?status=PAID&page=1&limit=10
    */
   @UseGuards(JwtAuthGuard)
   @Get('user')
@@ -48,8 +48,8 @@ export class OrderController {
   }
 
   /**
-   * Get all orders with optional filtering (admin only)
-   * GET /order/admin?status=PAID
+   * Get all orders with optional filtering and pagination (admin only)
+   * GET /order/admin?status=PAID&page=1&limit=10
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

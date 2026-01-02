@@ -86,17 +86,22 @@ export class OrderService {
   }
 
   /**
-   * Find all orders for a specific user with optional status filtering
+   * Find all orders for a specific user with optional status filtering and pagination
    * @param userId The ID of the user
-   * @param filterDto Optional filter criteria
-   * @returns Object containing orders array and total count
+   * @param filterDto Optional filter criteria and pagination options
+   * @returns Object containing orders array, total count, and pagination info
    */
-  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number }> {
+  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number, pagination?: any }> {
     // Start with base query for user's orders
     const filter = {
       userId: userId,
     };
 
+    // Extract pagination parameters with defaults
+    const page = filterDto?.page || 1;
+    const limit = filterDto?.limit || 10;
+    const skip = (Math.max(1, page) - 1) * Math.max(1, limit);
+
     // Apply status filter if provided
     if (filterDto?.status) {
       filter['status'] = filterDto.status;
@@ -106,22 +111,37 @@ export class OrderService {
     const [data, total] = await Promise.all([
       this.orderModel.find(filter)
         .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
         .exec(),
       this.orderModel.countDocuments(filter)
     ]);
 
-    // Return both data and count
-    return { data, total };
+    // Return data, count, and pagination info
+    return { 
+      data, 
+      total,
+      pagination: {
+        page: Math.max(1, page),
+        limit: Math.max(1, limit),
+        pages: Math.ceil(total / Math.max(1, limit)) || 1
+      }
+    };
   }
 
   /**
-   * Find all orders with optional filtering (for admin use)
-   * @param filterDto Optional filter criteria
-   * @returns Object containing orders array and total count
+   * Find all orders with optional filtering and pagination (for admin use)
+   * @param filterDto Optional filter criteria and pagination options
+   * @returns Object containing orders array, total count, and pagination info
    */
-  async findAllOrders(filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number }> {
+  async findAllOrders(filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number, pagination?: any }> {
     // Start with base query for all orders
     const filter = {};
+
+    // Extract pagination parameters with defaults
+    const page = filterDto?.page || 1;
+    const limit = filterDto?.limit || 10;
+    const skip = (Math.max(1, page) - 1) * Math.max(1, limit);
 
     // Apply status filter if provided
     if (filterDto?.status) {
@@ -132,12 +152,22 @@ export class OrderService {
     const [data, total] = await Promise.all([
       this.orderModel.find(filter)
         .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
         .exec(),
       this.orderModel.countDocuments(filter)
     ]);
 
-    // Return both data and count
-    return { data, total };
+    // Return data, count, and pagination info
+    return { 
+      data, 
+      total,
+      pagination: {
+        page: Math.max(1, page),
+        limit: Math.max(1, limit),
+        pages: Math.ceil(total / Math.max(1, limit)) || 1
+      }
+    };
   }
 
   async markOrderAsPaid(orderId: string, paymentIntentId: string) {
