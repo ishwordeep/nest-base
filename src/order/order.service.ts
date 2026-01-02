@@ -91,83 +91,187 @@ export class OrderService {
    * @param filterDto Optional filter criteria and pagination options
    * @returns Object containing orders array, pagination info (including total count), and statusCounts
    */
+  // async findUserOrders(
+  //   userId: string, 
+  //   filterDto?: FilterOrdersDto
+  // ): Promise<{
+  //   data: Order[];
+  //   pagination: any;
+  //   statusCounts: Record<string, number>;
+  // }> {
+  //   // Start with base query for user's orders
+  //   const filter = {
+  //     userId: userId,
+  //   };
+
+  //   // Extract pagination parameters with defaults
+  //   const page = Math.max(1, filterDto?.page || 1);
+  //   const limit = Math.max(1, filterDto?.limit || 10);
+  //   const skip = (page - 1) * limit;
+
+  //   // Apply status filter if provided
+  //   if (filterDto?.status) {
+  //     filter['status'] = filterDto.status;
+  //   }
+
+  //   // Execute query and count in parallel
+  //   const [data, total] = await Promise.all([
+  //     this.orderModel.find(filter)
+  //       .sort({ createdAt: -1 })
+  //       .skip(skip)
+  //       .limit(limit)
+  //       .exec(),
+  //     this.orderModel.countDocuments(filter)
+  //   ]);
+
+  //   // Aggregate counts by status for this user
+  //   // Create a match filter that includes userId and status if provided
+  //   const matchFilter: any = { userId: new Types.ObjectId(userId) };
+
+  //   // Only apply status filter to the aggregation if it's provided in the filterDto
+  //   if (filterDto?.status) {
+  //     matchFilter.status = filterDto.status;
+  //   }
+
+  //   const statusAggregation = await this.orderModel.aggregate([
+  //     {
+  //       $match: matchFilter
+  //     },
+  //     {
+  //       $group: {
+  //         _id: '$status',
+  //         count: { $sum: 1 }
+  //       }
+  //     }
+  //   ]);
+
+  //   // Normalize counts
+  //   const statusCounts: Record<string, number> = {
+  //     ALL: 0,
+  //     [OrderStatus.PENDING_PAYMENT]: 0,
+  //     [OrderStatus.PAID]: 0,
+  //     [OrderStatus.SHIPPED]: 0,
+  //     [OrderStatus.COMPLETED]: 0,
+  //     [OrderStatus.CANCELLED]: 0,
+  //   };
+
+  //   // Get total count of all orders for this user (without status filter)
+  //   const totalCount = await this.orderModel.countDocuments({ userId: new Types.ObjectId(userId) });
+  //   statusCounts.ALL = totalCount;
+
+  //   // Update individual status counts from aggregation
+  //   statusAggregation.forEach(item => {
+  //     if (statusCounts[item._id] !== undefined) {
+  //       statusCounts[item._id] = item.count;
+  //     }
+  //   });
+
+  //   console.log("User statusCounts:", statusCounts);
+
+  //   // Return data, pagination info with total count, and statusCounts
+  //   return {
+  //     data,
+  //     pagination: {
+  //       page,
+  //       limit,
+  //       pages: Math.ceil(total / limit) || 1,
+  //       total
+  //     },
+  //     statusCounts
+  //   };
+  // }
   async findUserOrders(
-    userId: string, 
-    filterDto?: FilterOrdersDto
-  ): Promise<{
-    data: Order[];
-    pagination: any;
-    statusCounts: Record<string, number>;
-  }> {
-    // Start with base query for user's orders
-    const filter = {
-      userId: userId,
-    };
+  userId: string,
+  filterDto?: FilterOrdersDto
+): Promise<{
+  data: Order[];
+  pagination: any;
+  statusCounts: Record<string, number>;
+}> {
 
-    // Extract pagination parameters with defaults
-    const page = Math.max(1, filterDto?.page || 1);
-    const limit = Math.max(1, filterDto?.limit || 10);
-    const skip = (page - 1) * limit;
+  // --------------------------------
+  // 1️⃣ Base filter for user orders
+  // --------------------------------
+  const filter: any = {
+    userId: userId, // ✅ STRING (matches schema)
+  };
 
-    // Apply status filter if provided
-    if (filterDto?.status) {
-      filter['status'] = filterDto.status;
-    }
-
-    // Execute query and count in parallel
-    const [data, total] = await Promise.all([
-      this.orderModel.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .exec(),
-      this.orderModel.countDocuments(filter)
-    ]);
-
-    // Aggregate counts by status for this user
-    const statusAggregation = await this.orderModel.aggregate([
-      {
-        $match: { userId: new Types.ObjectId(userId) }
-      },
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    // Normalize counts
-    const statusCounts: Record<string, number> = {
-      ALL: 0,
-      [OrderStatus.PENDING_PAYMENT]: 0,
-      [OrderStatus.PAID]: 0,
-      [OrderStatus.SHIPPED]: 0,
-      [OrderStatus.COMPLETED]: 0,
-      [OrderStatus.CANCELLED]: 0,
-    };
-
-    statusAggregation.forEach(item => {
-      if (statusCounts[item._id] !== undefined) {
-        statusCounts[item._id] = item.count;
-        statusCounts.ALL += item.count;
-      }
-    });
-
-    console.log("User statusCounts:", statusCounts);
-
-    // Return data, pagination info with total count, and statusCounts
-    return {
-      data,
-      pagination: {
-        page,
-        limit,
-        pages: Math.ceil(total / limit) || 1,
-        total
-      },
-      statusCounts
-    };
+  if (filterDto?.status) {
+    filter.status = filterDto.status;
   }
+
+  // --------------------------------
+  // 2️⃣ Pagination
+  // --------------------------------
+  const page = Math.max(1, filterDto?.page || 1);
+  const limit = Math.max(1, filterDto?.limit || 10);
+  const skip = (page - 1) * limit;
+
+  // --------------------------------
+  // 3️⃣ Fetch orders & total
+  // --------------------------------
+  const [data, total] = await Promise.all([
+    this.orderModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec(),
+
+    this.orderModel.countDocuments(filter)
+  ]);
+
+  // --------------------------------
+  // 4️⃣ Aggregate status counts (USER WISE)
+  // --------------------------------
+  const statusAggregation = await this.orderModel.aggregate([
+    {
+      $match: {
+        userId: userId // ✅ STRING
+      }
+    },
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  // --------------------------------
+  // 5️⃣ Normalize counts
+  // --------------------------------
+  const statusCounts: Record<string, number> = {
+    ALL: 0,
+    [OrderStatus.PENDING_PAYMENT]: 0,
+    [OrderStatus.PAID]: 0,
+    [OrderStatus.SHIPPED]: 0,
+    [OrderStatus.COMPLETED]: 0,
+    [OrderStatus.CANCELLED]: 0,
+  };
+
+  statusAggregation.forEach(item => {
+    if (statusCounts[item._id] !== undefined) {
+      statusCounts[item._id] = item.count;
+      statusCounts.ALL += item.count;
+    }
+  });
+
+  // --------------------------------
+  // 6️⃣ Response (unchanged)
+  // --------------------------------
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      pages: Math.ceil(total / limit) || 1,
+      total
+    },
+    statusCounts
+  };
+}
+
 
   /**
    * Find all orders with optional filtering and pagination (for admin use)
