@@ -89,46 +89,55 @@ export class OrderService {
    * Find all orders for a specific user with optional status filtering
    * @param userId The ID of the user
    * @param filterDto Optional filter criteria
-   * @returns Array of orders
+   * @returns Object containing orders array and total count
    */
-  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<Order[]> {
+  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number }> {
     // Start with base query for user's orders
-    const query = this.orderModel.find({
+    const filter = {
       userId: userId,
-    });
-    // console.log(query);
+    };
 
     // Apply status filter if provided
     if (filterDto?.status) {
-      query.where('status').equals(filterDto.status);
+      filter['status'] = filterDto.status;
     }
 
-    // Sort by most recent first
-    query.sort({ createdAt: -1 });
+    // Execute query and count in parallel
+    const [data, total] = await Promise.all([
+      this.orderModel.find(filter)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.orderModel.countDocuments(filter)
+    ]);
 
-    // Execute query
-    return query.exec();
+    // Return both data and count
+    return { data, total };
   }
 
   /**
    * Find all orders with optional filtering (for admin use)
    * @param filterDto Optional filter criteria
-   * @returns Array of orders
+   * @returns Object containing orders array and total count
    */
-  async findAllOrders(filterDto?: FilterOrdersDto): Promise<Order[]> {
+  async findAllOrders(filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number }> {
     // Start with base query for all orders
-    const query = this.orderModel.find();
+    const filter = {};
 
     // Apply status filter if provided
     if (filterDto?.status) {
-      query.where('status').equals(filterDto.status);
+      filter['status'] = filterDto.status;
     }
 
-    // Sort by most recent first
-    query.sort({ createdAt: -1 });
+    // Execute query and count in parallel
+    const [data, total] = await Promise.all([
+      this.orderModel.find(filter)
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.orderModel.countDocuments(filter)
+    ]);
 
-    // Execute query
-    return query.exec();
+    // Return both data and count
+    return { data, total };
   }
 
   async markOrderAsPaid(orderId: string, paymentIntentId: string) {

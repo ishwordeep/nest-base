@@ -19,10 +19,10 @@ export class StatisticsService {
 
     // Get all orders
     const allOrders = await this.orderService.findAllOrders();
-    const totalOrders = allOrders.length;
+    const totalOrders = allOrders.data.length;
 
     // Calculate total revenue from all orders
-    const totalRevenue = allOrders.reduce((sum, order) => sum + order.grandTotal, 0);
+    const totalRevenue = allOrders.data.reduce((sum, order) => sum + order.grandTotal, 0);
 
     // Get all products
     const allProducts = await this.productService.findAll({});
