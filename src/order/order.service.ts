@@ -89,9 +89,9 @@ export class OrderService {
    * Find all orders for a specific user with optional status filtering and pagination
    * @param userId The ID of the user
    * @param filterDto Optional filter criteria and pagination options
-   * @returns Object containing orders array, total count, and pagination info
+   * @returns Object containing orders array and pagination info (including total count)
    */
-  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number, pagination?: any }> {
+  async findUserOrders(userId: string, filterDto?: FilterOrdersDto): Promise<{ data: Order[], pagination?: any }> {
     // Start with base query for user's orders
     const filter = {
       userId: userId,
@@ -117,14 +117,14 @@ export class OrderService {
       this.orderModel.countDocuments(filter)
     ]);
 
-    // Return data, count, and pagination info
+    // Return data and pagination info with total count
     return { 
       data, 
-      total,
       pagination: {
         page: Math.max(1, page),
         limit: Math.max(1, limit),
-        pages: Math.ceil(total / Math.max(1, limit)) || 1
+        pages: Math.ceil(total / Math.max(1, limit)) || 1,
+        total
       }
     };
   }
@@ -132,9 +132,9 @@ export class OrderService {
   /**
    * Find all orders with optional filtering and pagination (for admin use)
    * @param filterDto Optional filter criteria and pagination options
-   * @returns Object containing orders array, total count, and pagination info
+   * @returns Object containing orders array and pagination info (including total count)
    */
-  async findAllOrders(filterDto?: FilterOrdersDto): Promise<{ data: Order[], total: number, pagination?: any }> {
+  async findAllOrders(filterDto?: FilterOrdersDto): Promise<{ data: Order[], pagination?: any }> {
     // Start with base query for all orders
     const filter = {};
 
@@ -158,14 +158,14 @@ export class OrderService {
       this.orderModel.countDocuments(filter)
     ]);
 
-    // Return data, count, and pagination info
+    // Return data and pagination info with total count
     return { 
       data, 
-      total,
       pagination: {
         page: Math.max(1, page),
         limit: Math.max(1, limit),
-        pages: Math.ceil(total / Math.max(1, limit)) || 1
+        pages: Math.ceil(total / Math.max(1, limit)) || 1,
+        total
       }
     };
   }
