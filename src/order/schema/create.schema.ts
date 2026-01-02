@@ -114,7 +114,7 @@ export class Order {
   @Prop({
     type: String,
     enum: Object.values(OrderStatus),
-    default: OrderStatus.PENDING_PAYMENT ,
+    default: OrderStatus.PENDING_PAYMENT,
   })
   status: OrderStatus;
 
@@ -134,6 +134,9 @@ export class Order {
 
   @Prop({ trim: true })
   transactionId?: string; // from payment gateway
+
+  @Prop({ trim: true })
+  paymentIntentId?: string;
 
   @Prop({ trim: true })
   notes?: string;

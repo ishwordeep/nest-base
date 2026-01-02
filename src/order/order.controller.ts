@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards, Request, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
@@ -8,6 +8,8 @@ import { UserRole } from 'src/user/schema/user.schema';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { StripeService } from 'src/stripe/stripe.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import Stripe from 'stripe';
+import { OrderStatus, PaymentStatus } from './schema/create.schema';
 
 @Controller('order')
 export class OrderController {
@@ -70,18 +72,76 @@ export class OrderController {
   @Post(':id/payment-intent')
   async createPaymentIntentForOrder(@Param('id') orderId: string, @Request() req) {
     const order = await this.orderService.findOne(orderId);
+    if (!order) throw new NotFoundException('Order not found');
 
     const userId = (req as any).user?.sub;
     if (order.userId?.toString() !== userId) throw new ForbiddenException();
 
-    const paymentIntent = await this.stripeService.createPaymentIntentForOrder(order);
+    // If order already paid, don't create/reuse a PI
+    if (order.status === OrderStatus.PAID || order.paymentStatus === PaymentStatus.PAID) {
+      throw new BadRequestException('Order is already paid');
+    }
+
+    // If we already have a PaymentIntent stored, try to reuse it
+    if (order.paymentIntentId) {
+      let existingPi: Stripe.PaymentIntent;
+
+      try {
+        existingPi = await this.stripeService.retrievePaymentIntent(order.paymentIntentId);
+      } catch (e: any) {
+        // If PI doesn't exist anymore, clear and create a new one
+        await this.orderService.clearPaymentIntent(orderId);
+        existingPi = null as any;
+      }
+
+      if (existingPi) {
+        const reusableStatuses: Stripe.PaymentIntent.Status[] = [
+          'requires_payment_method',
+          'requires_confirmation',
+          'requires_action',
+          'processing',
+        ];
+
+        if (reusableStatuses.includes(existingPi.status)) {
+          if (!existingPi.client_secret) {
+            throw new BadRequestException('PaymentIntent missing client_secret');
+          }
+
+          return {
+            orderId,
+            paymentIntentId: existingPi.id,
+            clientSecret: existingPi.client_secret,
+            amount: existingPi.amount,
+            currency: existingPi.currency,
+            reused: true,
+            status: existingPi.status,
+          };
+        }
+
+        // not reusable -> clear and continue to create fresh
+        await this.orderService.clearPaymentIntent(orderId);
+      }
+    }
+
+
+    // 2) Create a fresh PaymentIntent
+    const newPi = await this.stripeService.createPaymentIntentForOrder(order);
+
+    // 3) Store only the PaymentIntent ID on the order
+    await this.orderService.attachPaymentIntent(orderId, newPi.id);
+
+    if (!newPi.client_secret) {
+      throw new BadRequestException('PaymentIntent missing client_secret');
+    }
 
     return {
       orderId,
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
+      paymentIntentId: newPi.id,
+      clientSecret: newPi.client_secret,
+      amount: newPi.amount,
+      currency: newPi.currency,
+      reused: false,
+      status: newPi.status,
     };
   }
 

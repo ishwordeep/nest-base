@@ -31,6 +31,7 @@ export class WebhookController {
                 if (!orderId) break;
 
                 await this.orderService.markOrderAsPaid(orderId, paymentIntent.id);
+                await this.orderService.clearPaymentIntent(orderId);
                 break;
             }
 
@@ -42,6 +43,7 @@ export class WebhookController {
                 if (!orderId) break;
 
                 await this.orderService.markOrderAsFailed(orderId);
+                await this.orderService.clearPaymentIntent(orderId);
                 break;
             }
 

@@ -150,6 +150,23 @@ export class OrderService {
     await order.save();
   }
 
+  async attachPaymentIntent(orderId: string, paymentIntentId: string) {
+    return this.orderModel.findByIdAndUpdate(
+      orderId,
+      { paymentIntentId },
+      { new: true },
+    );
+  }
+
+  async clearPaymentIntent(orderId: string) {
+    return this.orderModel.findByIdAndUpdate(
+      orderId,
+      { $unset: { paymentIntentId: 1 } },
+      { new: true },
+    );
+  }
+
+
   /**
    * Update the status of an order
    * @param id The ID of the order to update

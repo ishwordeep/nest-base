@@ -81,6 +81,14 @@ export class StripeService {
     return paymentIntent;
   }
 
+  async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+    return this.stripe.paymentIntents.retrieve(paymentIntentId);
+  }
+
+  async cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+    return this.stripe.paymentIntents.cancel(paymentIntentId);
+  }
+
   // Subscriptions (Create Subscription)
   async createSubscription(
     customerId: string,
