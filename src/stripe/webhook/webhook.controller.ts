@@ -2,6 +2,7 @@ import { BadRequestException, Controller, Headers, Post, Req } from '@nestjs/com
 import type { Request } from 'express';
 import { StripeService } from '../stripe.service';
 import { OrderService } from 'src/order/order.service';
+import { Logger } from '@nestjs/common';
 
 @Controller('stripe')
 export class WebhookController {
@@ -18,7 +19,9 @@ export class WebhookController {
         let event;
 
         try {
+            const logger = new Logger(StripeService.name);
             event = await this.stripeService.verifyWebhook(req, signature);
+            logger.log(`Webhook: ${event.id} type=${event.type}`);
         } catch (err: any) {
             throw new BadRequestException(`Webhook Error: ${err.message}`);
         }
